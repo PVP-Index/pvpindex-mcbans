@@ -73,10 +73,19 @@ public class PlayerListener implements Listener {
                         status.ban().adminName(), status.ban().expiresAt());
             }
         } else {
+            // API unavailable — fall back to local SQLite cache
             Optional<LocalBan> localBan = plugin.getBanDao().findActiveBan(uuid);
             if (localBan.isPresent()) {
                 LocalBan ban = localBan.get();
                 denyLogin(event, ban.type(), ban.reason(), ban.adminName(), null);
+            } else if (config.isFailsafe()) {
+                // Issue #118: failsafe=true — deny login when API is unreachable
+                // and there is no cached ban record, to prevent unverified access.
+                event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
+                        "[MCBans] Server is currently unable to verify your ban status. "
+                                + "Please try again shortly.");
+                log.warning("[MCBans] Denied login for " + event.getName()
+                        + " (failsafe=true, API unreachable)");
             }
         }
     }

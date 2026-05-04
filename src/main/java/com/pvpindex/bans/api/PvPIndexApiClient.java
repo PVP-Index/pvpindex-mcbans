@@ -47,6 +47,18 @@ public class PvPIndexApiClient {
                 .build();
     }
 
+    /**
+     * Constructor with an injectable {@link HttpClient} \u2014 for unit testing only.
+     * Allows tests to supply a pre-configured client (e.g. pointing at an embedded HTTP server)
+     * without touching production network configuration.
+     */
+    PvPIndexApiClient(String baseUrl, String apiKey, Logger logger, HttpClient http) {
+        this.baseUrl = baseUrl.replaceAll("/$", "");
+        this.apiKey  = apiKey;
+        this.logger  = logger;
+        this.http    = http;
+    }
+
     // -------------------------------------------------------------------------
     // Ban status
     // -------------------------------------------------------------------------

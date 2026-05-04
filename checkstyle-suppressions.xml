@@ -58,4 +58,9 @@
     <!-- Test schema setup uses text blocks — same Checkstyle 10.x false positive -->
     <suppress files="BanDaoTest\.java" checks="Indentation"/>
 
+    <!-- PlayerListenerTest uses text blocks and embedded HTTP server helpers -->
+    <suppress files="PlayerListenerTest\.java"       checks="Indentation"/>
+    <suppress files="PvPIndexApiClientTest\.java"    checks="Indentation"/>
+    <suppress files="IssueRegressionTest\.java"      checks="Indentation"/>
+
 </suppressions>
