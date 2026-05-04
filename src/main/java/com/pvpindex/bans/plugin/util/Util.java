@@ -47,7 +47,7 @@ public class Util {
           public void run() {
             target.sendMessage(finalMsg);
           }
-        }.runTaskLater(MCBans.getPlugin(MCBans.class), 10);
+        }.runTaskLater(MCBans.getInstance(), 10);
       } else {
         new BukkitRunnable() {
           @Override
@@ -57,7 +57,7 @@ public class Util {
             Bukkit.getServer().getConsoleSender().sendMessage(finalMsg);
             //ActionLog.getInstance().info(msg);
           }
-        }.runTaskLater(MCBans.getPlugin(MCBans.class), 10);
+        }.runTaskLater(MCBans.getInstance(), 10);
 
       }
     }
@@ -73,7 +73,7 @@ public class Util {
               target.sendMessage(MCBans.getPrefix() + ChatColor.WHITE +" "+ finalMsg[i]);
             }
           }
-        }.runTaskLater(MCBans.getPlugin(MCBans.class), 10);
+        }.runTaskLater(MCBans.getInstance(), 10);
       } else {
         new BukkitRunnable() {
           @Override
@@ -85,7 +85,7 @@ public class Util {
             }
             //ActionLog.getInstance().info(msg);
           }
-        }.runTaskLater(MCBans.getPlugin(MCBans.class), 10);
+        }.runTaskLater(MCBans.getInstance(), 10);
 
       }
     }
@@ -122,7 +122,7 @@ public class Util {
           }
         }
       }
-    }.runTaskLater(MCBans.getPlugin(MCBans.class), 10);
+    }.runTaskLater(MCBans.getInstance(), 10);
   }
 
   public static void broadcastMessages(String[] messages) {
@@ -137,7 +137,7 @@ public class Util {
           }
         }
       }
-    }.runTaskLater(MCBans.getPlugin(MCBans.class), 10);
+    }.runTaskLater(MCBans.getInstance(), 10);
   }
 
   /**
