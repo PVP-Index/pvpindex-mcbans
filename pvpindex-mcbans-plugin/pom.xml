@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.pvpindex.bans</groupId>
+        <artifactId>pvpindex-mcbans-parent</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>pvpindex-mcbans-plugin</artifactId>
+    <packaging>jar</packaging>
+
+    <name>PvPIndex MCBans Plugin</name>
+    <description>PvPIndex MCBans — Minecraft ban management plugin for Paper 1.21.</description>
+
+    <dependencies>
+        <!-- PvPIndex API client (this project's api module) -->
+        <dependency>
+            <groupId>com.pvpindex.bans</groupId>
+            <artifactId>pvpindex-mcbans-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Paper API (provided by server at runtime) -->
+        <dependency>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Vault (economy/permissions, provided by server) -->
+        <dependency>
+            <groupId>com.github.MilkBowl</groupId>
+            <artifactId>VaultAPI</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- PlaceholderAPI (soft-depend, provided by server) -->
+        <dependency>
+            <groupId>me.clip</groupId>
+            <artifactId>placeholderapi</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Gson (transitively provided by pvpindex-mcbans-api at compile time) -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
+
+        <!-- SQLite JDBC (local offline cache) -->
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+        </dependency>
+
+        <!-- HikariCP (connection pooling for MySQL / PostgreSQL backends) -->
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+        </dependency>
+
+        <!-- MariaDB / MySQL JDBC driver -->
+        <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+        </dependency>
+
+        <!-- PostgreSQL JDBC driver -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
+
+        <!-- JUnit 5 -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- MockBukkit for Paper 1.21 -->
+        <dependency>
+            <groupId>org.mockbukkit.mockbukkit</groupId>
+            <artifactId>mockbukkit-v1.21</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>pvpindex-mcbans-${project.version}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <configuration>
+                    <configLocation>${maven.multiModuleProjectDirectory}/checkstyle.xml</configLocation>
+                    <suppressionsLocation>${maven.multiModuleProjectDirectory}/checkstyle-suppressions.xml</suppressionsLocation>
+                </configuration>
+            </plugin>
+
+            <!-- Shade runtime deps into fat JAR for the Minecraft server -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals><goal>shade</goal></goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <artifactSet>
+                                <excludes>
+                                    <exclude>io.papermc.paper:paper-api</exclude>
+                                    <exclude>com.github.MilkBowl:VaultAPI</exclude>
+                                    <exclude>org.junit.jupiter:*</exclude>
+                                    <exclude>org.mockbukkit.mockbukkit:*</exclude>
+                                </excludes>
+                            </artifactSet>
+                            <relocations>
+                                <relocation>
+                                    <pattern>org.sqlite</pattern>
+                                    <shadedPattern>com.pvpindex.bans.libs.sqlite</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.google.gson</pattern>
+                                    <shadedPattern>com.pvpindex.bans.libs.gson</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.zaxxer.hikari</pattern>
+                                    <shadedPattern>com.pvpindex.bans.libs.hikari</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.mariadb</pattern>
+                                    <shadedPattern>com.pvpindex.bans.libs.mariadb</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.postgresql</pattern>
+                                    <shadedPattern>com.pvpindex.bans.libs.postgresql</shadedPattern>
+                                </relocation>
+                            </relocations>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

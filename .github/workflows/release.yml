@@ -1,0 +1,130 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release (e.g. v1.0.0)'
+        required: true
+
+permissions:
+  contents: write   # Required to create GitHub Releases
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+          cache: maven
+
+      - name: Build (skip tests for release speed)
+        run: mvn clean package -B -DskipTests
+
+      # ── Locate artifact ────────────────────────────────────────────────────
+      - name: Locate JAR
+        id: jars
+        run: |
+          JAR=$(ls pvpindex-mcbans-plugin/target/pvpindex-mcbans-*.jar | grep -v 'original' | head -1)
+          echo "plugin=$JAR" >> "$GITHUB_OUTPUT"
+
+      # ── Extract version (strip leading 'v') ────────────────────────────────
+      - name: Extract version
+        id: meta
+        run: |
+          REF="${{ github.event.inputs.tag || github.ref_name }}"
+          echo "ref=${REF}" >> "$GITHUB_OUTPUT"
+          echo "version=${REF#v}" >> "$GITHUB_OUTPUT"
+
+      # ── Extract changelog section for this tag from CHANGELOG.md ──────────
+      - name: Extract changelog
+        id: changelog
+        run: |
+          VERSION="${{ steps.meta.outputs.version }}"
+          # Grab lines between the version header and the next '## [' header (exclusive).
+          NOTES=$(awk \
+            "/^## \[${VERSION}\]/{found=1; next} found && /^## \[/{exit} found{print}" \
+            CHANGELOG.md | sed '/^[[:space:]]*$/d' | sed '/^###/!b; s/^### /\n### /')
+          if [[ -z "$NOTES" ]]; then
+            NOTES="See [CHANGELOG.md](https://github.com/PVP-Index/pvpindex-mcbans/blob/main/CHANGELOG.md) for details."
+          fi
+          {
+            echo "notes<<EOF"
+            echo "$NOTES"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      # ── GitHub Release ─────────────────────────────────────────────────────
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.meta.outputs.ref }}
+          name: "PvPIndex MCBans ${{ steps.meta.outputs.ref }}"
+          body: |
+            ## What's Changed
+
+            ${{ steps.changelog.outputs.notes }}
+
+            ---
+
+            ### Downloads
+            | JAR | Target |
+            |-----|--------|
+            | `pvpindex-mcbans-${{ steps.meta.outputs.version }}.jar` | Paper 1.21.x |
+
+            Full documentation: https://github.com/PVP-Index/pvpindex-mcbans/tree/main/docs
+          files: |
+            ${{ steps.jars.outputs.plugin }}
+          fail_on_unmatched_files: true
+
+      # ── Modrinth ───────────────────────────────────────────────────────────
+      - name: Upload JAR to Modrinth
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+        run: |
+          PLUGIN_JAR="${{ steps.jars.outputs.plugin }}"
+          PLUGIN_FILENAME=$(basename "$PLUGIN_JAR")
+          VERSION="${{ steps.meta.outputs.version }}"
+          CHANGELOG=$(cat << 'ENDOFCHANGELOG'
+          ${{ steps.changelog.outputs.notes }}
+          ENDOFCHANGELOG
+          )
+
+          # Build the JSON payload in Python so shell quoting never corrupts it.
+          VERSION="$VERSION" CHANGELOG="$CHANGELOG" python3 -c "
+          import json, os
+          v = os.environ['VERSION']
+          c = os.environ['CHANGELOG']
+          print(json.dumps({
+            'name': f'PvPIndex MCBans {v}',
+            'version_number': v,
+            'changelog': c,
+            'dependencies': [],
+            'game_versions': ['1.21', '1.21.1', '1.21.2', '1.21.3', '1.21.4', '1.21.5'],
+            'version_type': 'release',
+            'loaders': ['paper', 'folia', 'purpur', 'spigot', 'bukkit'],
+            'featured': True,
+            'project_id': '8wyK7V60',
+            'primary_file': 'plugin_jar',
+            'file_parts': ['plugin_jar'],
+          }))
+          " > /tmp/modrinth_payload.json
+
+          HTTP_CODE=$(curl -s -o /tmp/modrinth.json -w '%{http_code}' \
+            --retry 3 --retry-delay 10 --retry-all-errors \
+            -X POST https://api.modrinth.com/v2/version \
+            -H "Authorization: $MODRINTH_TOKEN" \
+            -F "data=</tmp/modrinth_payload.json" \
+            -F "plugin_jar=@${PLUGIN_JAR};filename=${PLUGIN_FILENAME}")
+          echo "Modrinth response (HTTP $HTTP_CODE):"
+          cat /tmp/modrinth.json
+          [[ "$HTTP_CODE" =~ ^2 ]] || exit 1

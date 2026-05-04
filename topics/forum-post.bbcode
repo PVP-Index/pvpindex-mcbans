@@ -1,0 +1,215 @@
+[CENTER][IMG]https://pvpindex.com/og-default.png[/IMG]
+
+[SIZE=6][B]PvPIndex MCBans[/B][/SIZE]
+[SIZE=4]Global Ban Management for Paper Servers[/SIZE][/CENTER]
+
+[QUOTE]This is a refactored fork of the original [URL='https://dev.bukkit.org/projects/mcbans']MCBans[/URL] plugin. The ban-sharing concept, command structure, and permission layout originate from the MCBans team and their contributors. This fork modernises the codebase for Java 21 / Paper 1.21+ and replaces the legacy MCBans backend with the PvPIndex REST API.[/QUOTE]
+
+[B]PvPIndex MCBans[/B] connects your Paper server to the [URL='https://mcbans.pvpindex.com']mcbans.pvpindex.com[/URL] global ban network. Players banned on any participating server are automatically blocked everywhere else - while you keep full control over local bans, storage backends, and permission levels.
+
+[HR][/HR]
+
+[SIZE=5][B]Features[/B][/SIZE]
+
+[LIST]
+[*][B]Global & local bans[/B] - issue a local ban (stays on your server) or a global ban (synced to all connected servers in real time)
+[*][B]Temporary bans[/B] - time-limited bans with auto-expiry in minutes, hours, days, or weeks
+[*][B]IP bans[/B] - ban by IP address to block VPN abuse and ban evasion
+[*][B]Offline resilience[/B] - bans issued during API outages are queued and pushed on recovery; the [ICODE]failsafe[/ICODE] option can also block all logins when the API is unreachable
+[*][B]Delta sync[/B] - downloads only ban changes on a configurable background interval (default 60 min), keeping the local database lightweight
+[*][B]Multiple storage backends[/B] - SQLite (default, zero-config), MySQL/MariaDB, PostgreSQL
+[*][B]Alt-account detection[/B] - [ICODE]/altlookup[/ICODE] surfaces known alternate accounts via the PvPIndex API (premium)
+[*][B]Developer API (JitPack)[/B] - lightweight [ICODE]pvpindex-mcbans-api[/ICODE] module lets other plugins query ban status without a Bukkit dependency
+[*][B]Vault integration[/B] - optional; swap the permission backend to Vault in one config line
+[*][B]Fully translatable[/B] - swap the [ICODE]language[/ICODE] key to load a different locale file
+[/LIST]
+
+[HR][/HR]
+
+[SIZE=5][B]Requirements[/B][/SIZE]
+
+[TABLE]
+[TR]
+[TH]Component[/TH]
+[TH]Version[/TH]
+[/TR]
+[TR]
+[TD]Java[/TD]
+[TD]21+[/TD]
+[/TR]
+[TR]
+[TD]Paper[/TD]
+[TD]1.21+[/TD]
+[/TR]
+[TR]
+[TD]PvPIndex API key[/TD]
+[TD]Free at [URL='https://pvpindex.com/apply']pvpindex.com/apply[/URL][/TD]
+[/TR]
+[TR]
+[TD]Vault (optional)[/TD]
+[TD]Any recent version[/TD]
+[/TR]
+[/TABLE]
+
+[HR][/HR]
+
+[SIZE=5][B]Installation[/B][/SIZE]
+
+[LIST=1]
+[*]Download [ICODE]pvpindex-mcbans-<version>.jar[/ICODE] from [URL='https://github.com/PVP-Index/pvpindex-mcbans/releases']GitHub Releases[/URL].
+[*]Drop the JAR into your server's [ICODE]plugins/[/ICODE] folder and start the server - [ICODE]plugins/MCBans/config.yml[/ICODE] is generated automatically.
+[*][URL='https://pvpindex.com/apply']Apply for an API key[/URL], then set it in config:
+[CODE=yaml]pvpindex:
+  apiKey: "your-bearer-token-here"[/CODE]
+[*]Reload with [ICODE]/mcbans reload[/ICODE] or restart the server.
+[*]Run [ICODE]/mcbans sync[/ICODE] to pull the current ban list from the network.
+[/LIST]
+
+→ Full guide: [URL='https://docs.pvpindex.com/mcbans/installation']docs.pvpindex.com/mcbans/installation[/URL]
+
+[HR][/HR]
+
+[SIZE=5][B]Commands[/B][/SIZE]
+
+[SIZE=4][B]Ban commands[/B][/SIZE]
+
+[TABLE]
+[TR]
+[TH]Command[/TH]
+[TH]Permission[/TH]
+[TH]Description[/TH]
+[/TR]
+[TR]
+[TD][ICODE]/ban <player> [reason][/ICODE][/TD]
+[TD][ICODE]mcbans.ban.local[/ICODE][/TD]
+[TD]Issue a local ban[/TD]
+[/TR]
+[TR]
+[TD][ICODE]/ban <player> g <reason>[/ICODE] · [ICODE]/gban[/ICODE][/TD]
+[TD][ICODE]mcbans.ban.global[/ICODE][/TD]
+[TD]Issue a global ban (synced network-wide)[/TD]
+[/TR]
+[TR]
+[TD][ICODE]/ban <player> t <n> <m|h|d|w> [reason][/ICODE] · [ICODE]/tban[/ICODE][/TD]
+[TD][ICODE]mcbans.ban.temp[/ICODE][/TD]
+[TD]Temporary ban with auto-expiry[/TD]
+[/TR]
+[TR]
+[TD][ICODE]/banip <ip> [reason][/ICODE] · [ICODE]/ipban[/ICODE][/TD]
+[TD][ICODE]mcbans.ban.ip[/ICODE][/TD]
+[TD]Ban an IP address[/TD]
+[/TR]
+[TR]
+[TD][ICODE]/unban <player|IP|UUID>[/ICODE][/TD]
+[TD][ICODE]mcbans.unban[/ICODE][/TD]
+[TD]Remove any active ban[/TD]
+[/TR]
+[/TABLE]
+
+[SIZE=4][B]Moderation commands[/B][/SIZE]
+
+[TABLE]
+[TR]
+[TH]Command[/TH]
+[TH]Permission[/TH]
+[TH]Description[/TH]
+[/TR]
+[TR]
+[TD][ICODE]/kick <player> [reason][/ICODE][/TD]
+[TD][ICODE]mcbans.kick[/ICODE][/TD]
+[TD]Kick a player without banning[/TD]
+[/TR]
+[TR]
+[TD][ICODE]/lookup <player|UUID>[/ICODE] · [ICODE]/lup[/ICODE][/TD]
+[TD][ICODE]mcbans.lookup.player[/ICODE][/TD]
+[TD]View a player's ban history[/TD]
+[/TR]
+[TR]
+[TD][ICODE]/banlookup <id>[/ICODE] · [ICODE]/blup[/ICODE][/TD]
+[TD][ICODE]mcbans.lookup.ban[/ICODE][/TD]
+[TD]View a specific ban record by ID[/TD]
+[/TR]
+[TR]
+[TD][ICODE]/altlookup <player|UUID>[/ICODE] · [ICODE]/alup[/ICODE][/TD]
+[TD][ICODE]mcbans.lookup.alt[/ICODE][/TD]
+[TD]Show known alternate accounts[/TD]
+[/TR]
+[/TABLE]
+
+[SIZE=4][B]Admin commands[/B][/SIZE]
+
+[TABLE]
+[TR]
+[TH]Command[/TH]
+[TH]Description[/TH]
+[/TR]
+[TR]
+[TD][ICODE]/mcbans[/ICODE][/TD]
+[TD]Show help[/TD]
+[/TR]
+[TR]
+[TD][ICODE]/mcbans reload[/ICODE][/TD]
+[TD]Reload config and language files[/TD]
+[/TR]
+[TR]
+[TD][ICODE]/mcbans sync[/ICODE][/TD]
+[TD]Force an immediate push + download cycle[/TD]
+[/TR]
+[/TABLE]
+
+[HR][/HR]
+
+[SIZE=5][B]Configuration Snapshot[/B][/SIZE]
+
+[CODE=yaml]pvpindex:
+  apiUrl:       https://api.pvpindex.com
+  apiKey:       ""            # ← paste your key here
+  syncInterval: 60            # background sync in minutes
+
+storage:
+  backend: sqlite             # sqlite | mysql | postgresql
+
+language:   default
+permission: SuperPerms        # SuperPerms | Vault
+
+failsafe: false               # true = block all logins when API unreachable[/CODE]
+
+→ Full reference: [URL='https://docs.pvpindex.com/mcbans/configuration']docs.pvpindex.com/mcbans/configuration[/URL]
+
+[HR][/HR]
+
+[SIZE=5][B]Developer API (JitPack)[/B][/SIZE]
+
+Add the lightweight API client to your own plugin - no Bukkit dependency required:
+
+[CODE=xml]<repositories>
+    <repository>
+        <id>jitpack</id>
+        <url>https://jitpack.io</url>
+    </repository>
+</repositories>
+<dependency>
+    <groupId>com.github.PVP-Index.pvpindex-mcbans</groupId>
+    <artifactId>pvpindex-mcbans-api</artifactId>
+    <version>1.0.0</version>
+</dependency>[/CODE]
+
+→ [URL='https://docs.pvpindex.com/mcbans/developer-api']Developer API documentation[/URL]
+
+[HR][/HR]
+
+[SIZE=5][B]Links[/B][/SIZE]
+
+[LIST]
+[*][B]Ban registry[/B] - [URL='https://mcbans.pvpindex.com']mcbans.pvpindex.com[/URL]
+[*][B]Documentation[/B] - [URL='https://docs.pvpindex.com/mcbans/overview']docs.pvpindex.com/mcbans[/URL]
+[*][B]Source[/B] - [URL='https://github.com/PVP-Index/pvpindex-mcbans']github.com/PVP-Index/pvpindex-mcbans[/URL]
+[*][B]Issue tracker[/B] - [URL='https://github.com/PVP-Index/pvpindex-mcbans/issues']github.com/PVP-Index/pvpindex-mcbans/issues[/URL]
+[*][B]Apply for an API key[/B] - [URL='https://pvpindex.com/apply']pvpindex.com/apply[/URL]
+[/LIST]
+
+[HR][/HR]
+
+[SIZE=5][B]Credits[/B][/SIZE]
+
+PvPIndex MCBans is a refactored fork of the original [B]MCBans[/B] plugin by the MCBans team and contributors ([URL='https://dev.bukkit.org/projects/mcbans']dev.bukkit.org/projects/mcbans[/URL]). The ban-sharing concept, TCP wire protocol, command set, and permission layout all originate from that project. This fork modernises the codebase for Java 21 / Paper 1.21+ and replaces the legacy MCBans backend with the PvPIndex REST API.

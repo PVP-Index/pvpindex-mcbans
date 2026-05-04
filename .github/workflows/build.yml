@@ -1,0 +1,40 @@
+name: Build & Test
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+          cache: maven
+
+      - name: Build & test
+        run: mvn clean verify -B
+
+      - name: Verify plugin JAR exists
+        run: test -f pvpindex-mcbans-plugin/target/pvpindex-mcbans-*.jar
+
+      - name: Verify plugin.yml in JAR
+        run: jar tf pvpindex-mcbans-plugin/target/pvpindex-mcbans-*.jar | grep -q "plugin.yml"
+
+      - name: Verify config.yml in JAR
+        run: jar tf pvpindex-mcbans-plugin/target/pvpindex-mcbans-*.jar | grep -q "config.yml"
+
+      - name: Upload plugin JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: pvpindex-mcbans
+          path: pvpindex-mcbans-plugin/target/pvpindex-mcbans-*.jar
+          if-no-files-found: error

@@ -1,0 +1,32 @@
+package com.pvpindex.bans.plugin.commands.mcbans;
+
+import com.pvpindex.bans.plugin.ConfigurationManager;
+import com.pvpindex.bans.plugin.MCBans;
+import com.pvpindex.bans.plugin.exception.CommandException;
+import com.pvpindex.bans.plugin.util.Util;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+
+import java.util.List;
+
+/**
+ * Handles {@code /mcbans download}.
+ */
+public class McBansDownloadSubcommand extends McBansSubcommand {
+
+    public McBansDownloadSubcommand(
+            MCBans plugin,
+            CommandSender sender,
+            Player senderPlayer,
+            ConfigurationManager config,
+            List<String> args) {
+        super(plugin, sender, senderPlayer, config, args);
+    }
+
+    @Override
+    public void execute() throws CommandException {
+        Util.message(sender, "Downloading banned-players.txt to "
+                + plugin.getDataFolder().getAbsolutePath());
+        Util.message(sender, "Download not supported in this version.");
+    }
+}
