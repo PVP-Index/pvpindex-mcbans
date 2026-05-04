@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>mcbans</groupId>
+    <artifactId>pvpindex-mcbans</artifactId>
+    <!-- version is kept in version.txt; read at build time via flatten-maven-plugin or set manually -->
+    <version>5.1.14</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Paths to local JARs (relative to project root) -->
+        <libs.dir>${project.basedir}/libs</libs.dir>
+        <!-- Main class for exec:java -->
+        <mainClass>com.mcbans.test.Main</mainClass>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>md-5-snapshots</id>
+            <url>https://repo.md-5.net/content/repositories/snapshots/</url>
+        </repository>
+        <repository>
+            <id>spigotmc-snapshots</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+        </repository>
+        <repository>
+            <id>sonatype-snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </repository>
+        <repository>
+            <id>jitpack</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <!-- Bukkit API -->
+        <dependency>
+            <groupId>org.bukkit</groupId>
+            <artifactId>bukkit</artifactId>
+            <version>1.15.2-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- LogBlock -->
+        <dependency>
+            <groupId>de.diddiz</groupId>
+            <artifactId>logblock</artifactId>
+            <version>1.16.5.2-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- VaultAPI -->
+        <dependency>
+            <groupId>com.github.MilkBowl</groupId>
+            <artifactId>VaultAPI</artifactId>
+            <version>1.7</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Log4j -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>2.17.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.17.1</version>
+        </dependency>
+
+        <!-- Local JARs from libs/ -->
+        <dependency>
+            <groupId>com.coresuite</groupId>
+            <artifactId>coreprotect</artifactId>
+            <version>2.0.9</version>
+            <scope>system</scope>
+            <systemPath>${libs.dir}/CoreProtect_2.0.9.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.hawkeyeplus</groupId>
+            <artifactId>hawkeye</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${libs.dir}/HawkEye.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>ru.tehkode</groupId>
+            <artifactId>PermissionsEx</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${libs.dir}/PermissionsEx.jar</systemPath>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Shade all runtime dependencies into a fat JAR (for Bukkit plugin distribution) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <!-- Exclude provided / system-scoped deps from the fat JAR -->
+                            <artifactSet>
+                                <excludes>
+                                    <exclude>org.bukkit:bukkit</exclude>
+                                    <exclude>de.diddiz:logblock</exclude>
+                                    <exclude>com.github.MilkBowl:VaultAPI</exclude>
+                                    <exclude>com.coresuite:coreprotect</exclude>
+                                    <exclude>com.hawkeyeplus:hawkeye</exclude>
+                                    <exclude>ru.tehkode:PermissionsEx</exclude>
+                                </excludes>
+                            </artifactSet>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- exec:java to run standalone test classes (replaces `./gradlew run --args=...`) -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.1</version>
+                <configuration>
+                    <mainClass>${mainClass}</mainClass>
+                    <includeProjectDependencies>true</includeProjectDependencies>
+                    <includePluginDependencies>false</includePluginDependencies>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
