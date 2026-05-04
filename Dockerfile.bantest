@@ -1,14 +1,18 @@
-FROM openjdk:8-jdk-alpine
+FROM maven:3.9-eclipse-temurin-8-alpine AS build
 
 WORKDIR /app
 
 # Copy the entire project
 COPY . /app/
 
-# Make gradlew executable
-RUN chmod +x /app/gradlew
+# Build and cache dependencies
+RUN mvn -B package -DskipTests
 
-RUN /app/gradlew install
+FROM eclipse-temurin:8-jre-alpine
+
+WORKDIR /app
+
+COPY --from=build /app /app
 
 # Create a shell script to run the BanTest class
 RUN echo '#!/bin/sh' > /app/run.sh && \
@@ -20,7 +24,7 @@ RUN echo '#!/bin/sh' > /app/run.sh && \
     echo 'if [ -z "$MCBANS_PLAYER_TO_BAN" ]; then' >> /app/run.sh && \
     echo '  export MCBANS_PLAYER_TO_BAN="test_player"' >> /app/run.sh && \
     echo 'fi' >> /app/run.sh && \
-    echo '/app/gradlew --offline run --args="com.mcbans.test.BanTest"' >> /app/run.sh && \
+    echo 'cd /app && mvn -o exec:java -Dexec.mainClass=com.mcbans.test.BanTest' >> /app/run.sh && \
     chmod +x /app/run.sh
 
 # Run the shell script
