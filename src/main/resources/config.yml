@@ -1,158 +1,78 @@
 #########################################################
-# MCBans Configuration File
-# Plugin version 5.1.0 (Firestar, Syamn, Draco)
-# - Main Site: http://mcbans.com
-# - Support Desk: http://forums.mcbans.com
-# - Community: http://forums.mcbans.com
+# PvPIndex MCBans Configuration
+# Plugin version 5.2.0
+# - Platform: https://pvpindex.com
+# - API:      https://api.pvpindex.com
 ##
 
 # prefix:
-#   Prefix used for MCBans plugin messages to users on the server
+#   Prefix for MCBans messages shown to players.
 #   DEFAULT: "&cMCBans &8>&r "
 prefix: "&cMCBans &8>&r "
 
-# apiKey:
-#   Your servers apiKey can be found in your account dashboard http://my.mcbans.com/servers
-apiKey: YOUR_API_KEY_HERE
+#########################################################
+# PvPIndex API
+#   Credentials and sync settings for the PvPIndex REST API.
+##
 
-# encryption:
-#   Encrypt communications between MCBans API and your Minecraft Server
-encryption: false
+pvpindex:
+  # apiUrl: Base URL of the PvPIndex API.
+  #   DEFAULT: "https://api.pvpindex.com"
+  apiUrl: "https://api.pvpindex.com"
 
-# language:
-#   Language you want to have displayed to the players
+  # apiKey: Your server's Bearer token from the PvPIndex dashboard.
+  #   Required for ban sync. Obtain one at https://pvpindex.com/apply
+  apiKey: ""
+
+  # syncInterval: How often (in minutes) to sync bans with the API.
+  #   DEFAULT: 60
+  syncInterval: 60
+
+#########################################################
+# Localisation
+##
+
+# language: Language file to load from plugins/MCBans/languages/
 #   DEFAULT: default
 language: default
 
-# permission:
-#   Choose permission controller: Vault, PermissionsEx, SuperPerms (default), OPs
+#########################################################
+# Permissions
+##
+
+# permission: Permission backend — Vault, SuperPerms, OPs
 #   DEFAULT: SuperPerms
 permission: SuperPerms
 
-# defaultLocal:
-#   Default reason for users being locally banned from the server, if no reason is provided.
-#   DEFAULT: "You have been banned!"
-defaultLocal: "You have been banned!"
-
-# defaultTemp:
-#   Default reason for users being temporarily banned from the server, if no reason is provided.
-#   DEFAULT: "You have been temporarily banned!"
-defaultTemp: "You have been temporarily banned!"
-
-# defaultKick:
-#   Default reason for users being kicked from the server, if no reason is provided.
-#   DEFAULT: "You have been kicked!"
-defaultKick: "You have been kicked!"
-
 #########################################################
-# Loging and Debug
-#   Debugging and MCBans message logging settings
+# Default Messages
 ##
 
-# isDebug:
-#   Enable additional debug messages throughout the plugin
+defaultLocal: "You have been banned!"
+defaultTemp:  "You have been temporarily banned!"
+defaultKick:  "You have been kicked!"
+
+#########################################################
+# Logging & Debug
+##
+
+# isDebug: Print verbose debug output to console.
 #   DEFAULT: false
 isDebug: false
 
-# logEnable:
-#   Enable logging MCBans actions and information to a file
+# logEnable: Write ban actions to a local log file.
 #   DEFAULT: false
 logEnable: false
 
-# logFile:
-#   Location and name of the file to log MCBans plugin data into
+# logFile: Path to the log file.
 #   DEFAULT: plugins/MCBans/actions.log
 logFile: "plugins/MCBans/actions.log"
 
 #########################################################
-# Alternate Account Limiting
-#   Limits the how alternate accounts affect connectability to the server
+# Miscellaneous
 ##
 
-# enableMaxAlts:
-#   Activate limiting maximum number of alt accounts (true/false)
-#   Limits the maximum number of alt accounts a user may have before
-#   being denied access to the server.
-#   DEFAULT: false
-enableMaxAlts: false
-
-# maxAlts:
-#   Maximum number of alternate accounts allowed before denying user
-#   DEFAULT: 2
-maxAlts: 2
-
-#########################################################
-# Block logger plugin integration
-#   Support LogBlock, HawkEye, CoreProtect plugin!
-##
-
-# affectedWorlds:
-#   Worlds to issue log data or rollback
-#   LogBlock and HawkEye Only! CoreProtect not supported this parameter ;(
-#   DEFAULT: '*' ('*' to all worlds)
-#   Multiple worlds: world,world_nether,3rdworld (no spaces)
-affectedWorlds: '*'
-
-# backDaysAgo:
-#   days ago to roll back a player
-#   DEFAULT: 20 (0 (<=0) to infinite)
-backDaysAgo: 20
-
-#########################################################
-# MCBans syncing!
-#   syncing for bans made into the banned-players.txt
-##
-
-# enableAutoSync:
-#   Allow auto sync to banned-players.txt
-#   DEFAULT: true
-enableAutoSync: true
-
-# autoSyncInterval:
-#   sync every "autoSyncInterval" and grab/delete bans in minutes
-#   DEFAULT: 30 (30 Seconds)
-autoSyncInterval: 30
-
-#########################################################
-# Miscellaneous Settings
-#   Settings that don't have a part of any other sections
-##
-
-# onJoinMCBansMessage:
-#   Display "Server protected by MCBans.com" advertisement notice to users upon connection.
-#   DEFAULT: false, RECOMMENDED: true
-onJoinMCBansMessage: false
-
-# sendDetailPrevBansOnJoin:
-#   Show detail previous bans information (banned server, reason, issued by) on player join.
-#   (Require "mcbans.view.bans" permission. "mcbans.hideview" is exempt permission.)
-#   DEFAULT: true
-sendDetailPrevBansOnJoin: true
-
-# minRep:
-#   Minimum reputation a user may have before being disallowed access to the server.
-#   DEFAULT: 3 (-1 to disable)
-minRep: 3
-
-# callBackInterval:
-#   Time (in minutes) between callbacks to the MCBans Master Server
-#   (Excluding the API connections on userConnect)
-#   DEFAULT: 15 (15 Minutes)
-callBackInterval: 15
-
-# timeout:
-#   Timeout (in seconds) value of connecting mcbans API server while player joining the server.
-#   DEFAULT: 10 (10 Seconds)
-timeout: 10
-
-# failsafe:
-#   If set to true, disallow access to the server when can't auth players,
-#   unavailable mcbans api servers (timeout), internal plugin error etc.
+# failsafe: Deny login if the API is unreachable AND no local ban record exists.
+#   Set to true for maximum security (may cause false kicks during API outages).
 #   DEFAULT: false
 failsafe: false
-
-#########################################################
-# DO NOT TOUCH
-#   Do not touch this option! It is a check if you are running the recent configuration version
-##
-ConfigVersion: 2
