@@ -1,3 +1,12 @@
+/*
+ * This file is part of PvPIndex MCBans, a modified fork of MCBans.
+ *
+ * Original work Copyright (C) MCBans authors and contributors.
+ * Modifications Copyright (C) 2026 PvPIndex contributors.
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU Affero General Public License version 3.
+ */
 package com.pvpindex.bans.plugin.request;
 
 import com.pvpindex.bans.api.BanRequest;
@@ -131,13 +140,15 @@ public class Ban {
             plugin.getBanDao().insertOfflineBan(uuid, playerName, "global", reason,
                     normaliseUUID(senderUUID), senderName, null);
 
-            // Try pushing to API
-            boolean apiOk = plugin.getApiClient()
-                    .ban(new BanRequest(uuid, playerName, "global", reason,
-                            normaliseUUID(senderUUID), senderName, null))
-                    .isPresent();
-            if (apiOk) {
-                plugin.getBanDao().markSynced(uuid);
+            // Try pushing to API (only when a key is configured)
+            if (plugin.getConfigs().isValidApiKey()) {
+                boolean apiOk = plugin.getApiClient()
+                        .ban(new BanRequest(uuid, playerName, "global", reason,
+                                normaliseUUID(senderUUID), senderName, null))
+                        .isPresent();
+                if (apiOk) {
+                    plugin.getBanDao().markSynced(uuid);
+                }
             }
 
             kick(localize("globalBanPlayer", I18n.REASON, reason, I18n.SENDER, senderName));
@@ -161,12 +172,14 @@ public class Ban {
             plugin.getBanDao().insertOfflineBan(uuid, playerName, "local", reason,
                     normaliseUUID(senderUUID), senderName, null);
 
-            boolean apiOk = plugin.getApiClient()
-                    .ban(new BanRequest(uuid, playerName, "local", reason,
-                            normaliseUUID(senderUUID), senderName, null))
-                    .isPresent();
-            if (apiOk) {
-                plugin.getBanDao().markSynced(uuid);
+            if (plugin.getConfigs().isValidApiKey()) {
+                boolean apiOk = plugin.getApiClient()
+                        .ban(new BanRequest(uuid, playerName, "local", reason,
+                                normaliseUUID(senderUUID), senderName, null))
+                        .isPresent();
+                if (apiOk) {
+                    plugin.getBanDao().markSynced(uuid);
+                }
             }
 
             kick(localize("localBanPlayer", I18n.REASON, reason, I18n.SENDER, senderName));
@@ -194,7 +207,7 @@ public class Ban {
             plugin.getBanDao().insertOfflineBan(uuid, playerName, "temp", reason,
                     normaliseUUID(senderUUID), senderName, expiresEpoch);
 
-            boolean apiOk = plugin.getApiClient()
+            boolean apiOk = plugin.getConfigs().isValidApiKey() && plugin.getApiClient()
                     .ban(new BanRequest(uuid, playerName, "temp", reason,
                             normaliseUUID(senderUUID), senderName, expiresIso))
                     .isPresent();
@@ -231,12 +244,14 @@ public class Ban {
             String uuid = normaliseUUID(playerUUID);
             plugin.getBanDao().deactivateBan(uuid);
 
-            boolean apiOk = plugin.getApiClient().unban(uuid);
-            if (!apiOk) {
-                plugin.getBanDao().insertOfflineBan(uuid, playerName, "local", "UNBAN",
-                        normaliseUUID(senderUUID), senderName, null);
-                // Mark as unban-pending (is_active=false) so BanSync uploads the unban
-                plugin.getBanDao().deactivateBan(uuid);
+            if (plugin.getConfigs().isValidApiKey()) {
+                boolean apiOk = plugin.getApiClient().unban(uuid);
+                if (!apiOk) {
+                    plugin.getBanDao().insertOfflineBan(uuid, playerName, "local", "UNBAN",
+                            normaliseUUID(senderUUID), senderName, null);
+                    // Mark as unban-pending (is_active=false) so BanSync uploads the unban
+                    plugin.getBanDao().deactivateBan(uuid);
+                }
             }
 
             Util.broadcastMessage(ChatColor.GREEN + localize("unBanSuccess",

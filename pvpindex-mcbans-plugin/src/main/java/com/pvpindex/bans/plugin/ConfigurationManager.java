@@ -1,3 +1,12 @@
+/*
+ * This file is part of PvPIndex MCBans, a modified fork of MCBans.
+ *
+ * Original work Copyright (C) MCBans authors and contributors.
+ * Modifications Copyright (C) 2026 PvPIndex contributors.
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU Affero General Public License version 3.
+ */
 package com.pvpindex.bans.plugin;
 
 import java.io.File;
@@ -101,11 +110,13 @@ public class ConfigurationManager {
 
             // force copy config.yml and languages
             FileStructure.extractResource("/config.yml", pluginDir, true, false);
+            // Also re-extract language files so updated URLs/messages take effect
+            I18n.extractLanguageFiles(true);
 
             plugin.reloadConfig();
             conf = plugin.getConfig();
 
-            log.info("Generated fresh config.yml.");
+            log.info("Generated fresh config.yml and re-extracted language files.");
         }
     }
     

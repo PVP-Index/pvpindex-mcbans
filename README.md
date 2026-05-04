@@ -85,15 +85,22 @@ Add the lightweight API client to your own plugin — no Bukkit dependency requi
 
 See [Developer API docs](https://docs.pvpindex.com/mcbans/developer-api) for usage examples.
 
-## Credits
+## License and attribution
 
-PvPIndex MCBans is a refactored fork of the original **MCBans** plugin. Original project: <https://dev.bukkit.org/projects/mcbans>. The ban-sharing concept, TCP wire protocol, command set, and permission layout all originate from the MCBans team and their contributors. This fork modernises the codebase and replaces the legacy MCBans backend with the PvPIndex REST API.
+PvPIndex MCBans is a modified fork of the original MCBans plugin.
 
-## Changelog
+**Original project:**
+- MCBans by Firestarthe, Syamn, Corpdraco and the MCBans contributors
+- Original source: <https://github.com/MCBans/MCBans>
+- Original license: GNU Affero General Public License v3.0
 
-See [CHANGELOG.md](CHANGELOG.md).
+**Modifications by PvPIndex contributors (2026) include:**
+- Java 21 / Paper 1.21+ modernisation
+- PvPIndex REST API integration (replacing the legacy MCBans backend)
+- Maven multi-module restructuring (`pvpindex-mcbans-api` + `pvpindex-mcbans-plugin`)
+- Storage layer and synchronisation changes
 
-## License
+Modified versions are distributed under the **GNU Affero General Public License v3.0** (AGPL-3.0).
+See [LICENSE](LICENSE) for the full license text and [NOTICE.md](NOTICE.md) for attribution details.
 
-Distributed under the terms of the original MCBans license. See [LICENSE](LICENSE).
 
