@@ -20,23 +20,16 @@ jobs:
         with:
           java-version: '8'
           distribution: 'temurin'
-          cache: gradle
-
-      - name: Build with Gradle
-        run: chmod +x ./gradlew && ./gradlew build
+          cache: maven
 
       - name: Extract version from version.txt
-        id: gradle_version
         run: |
           VERSION=$(cat version.txt)
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "Extracted version: $VERSION"
 
-      - name: Create JAR file
-        run: |
-          mkdir -p build/libs
-          jar -cf build/libs/mcbans-${{ env.VERSION }}.jar -C build/classes/java/main .
-          echo "Created JAR file: build/libs/mcbans-${{ env.VERSION }}.jar"
+      - name: Build with Maven
+        run: mvn -B package -DskipTests
 
       - name: Create Release
         id: create_release
@@ -56,6 +49,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: build/libs/mcbans-${{ env.VERSION }}.jar
-          asset_name: mcbans-${{ env.VERSION }}.jar
+          asset_path: target/pvpindex-mcbans-${{ env.VERSION }}.jar
+          asset_name: pvpindex-mcbans-${{ env.VERSION }}.jar
           asset_content_type: application/java-archive
