@@ -196,6 +196,14 @@ public class MCBans extends JavaPlugin {
         return apiClient;
     }
 
+    /**
+     * Replaces the API client — for unit testing only.
+     * Allows injecting a stub without modifying config or network.
+     */
+    void setApiClientForTesting(PvPIndexApiClient client) {
+        this.apiClient = client;
+    }
+
     public MCBansAPI getAPI(Plugin plugin) {
         return MCBansAPI.getHandle(this, plugin);
     }
