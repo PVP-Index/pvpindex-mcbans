@@ -1,122 +1,145 @@
-MCBans Server Plugin
+# PvPIndex MCBans
 
-Author: Firestarthe, Syamn, Corpdraco
+A Minecraft Paper plugin that enforces bans through the [PvPIndex](https://pvpindex.com) REST API, with full offline fallback via a local SQLite cache.
 
+## Features
 
-Welcome to MCBans
-====================
+- **Global & local bans** — synced to the PvPIndex API in real time
+- **Temp bans** — with expiry times, auto-expired locally if the API is unavailable
+- **Offline resilience** — bans issued while the API is down are queued and pushed at the next sync cycle
+- **Background delta sync** — downloads ban changes from the API on a configurable interval (default 60 min)
+- **API-first, cache-fallback** — login checks hit the API first (3 s timeout), then fall back to SQLite
 
-MCBans is a global banning solution for Minecraft, provided through the Bukkit plugin. The aim of the plugin is to provide server owners with a method of assisting in the prevention of griefers on their own and other's servers, using both local and global bans.
+## Requirements
 
-Helpful Information
---------
-Main Site: https://mcbans.com
+| Component | Version |
+|-----------|---------|
+| Java | 21+ |
+| Paper | 1.21+ |
+| PvPIndex API key | [Apply here](https://pvpindex.com/apply) |
 
-Support Desk: https://forums.mcbans.com/support-tickets/open
+## Installation
 
-Community: https://forums.mcbans.com
+1. Drop `pvpindex-mcbans-*.jar` into your server's `plugins/` folder.
+2. Start the server once to generate `plugins/MCBans/config.yml`.
+3. Set your API key:
+   ```yaml
+   pvpindex:
+     apiKey: "your-bearer-token-here"
+   ```
+4. Restart or `/mcbans reload`.
 
-Expectations
---------
+## Configuration (`config.yml`)
 
-Please remember the following things while using our plugin!
+```yaml
+pvpindex:
+  apiUrl:       https://api.pvpindex.com   # API base URL
+  apiKey:       ""                          # Bearer token from PvPIndex dashboard
+  syncInterval: 60                          # Delta-sync interval in minutes
 
-* MCBans is maintained constantly by a team of staff, but we're not miracle workers! Like everyone, we need time to perform our tasks and can't do everything on demand.
-* MCBans isn't always 100% clear from invalid bans - but, we're well on our way. Your help is always thanked in removing invalid bans and we try our hardest to monitor everything.
-* MCBans has a small dedicated development team - We do only have a few dedicated developers, but they do have other commitments as well.
-* MCBans staff don't always have good memories! Visit our support desk.
+prefix:   "&cMCBans &8>&r "
+language: default
+permission: SuperPerms   # Vault | SuperPerms | OPs
 
-Commands
---------
+defaultLocal: "You have been banned!"
+defaultTemp:  "You have been temporarily banned!"
+defaultKick:  "You have been kicked!"
 
-Local Ban Variations
-* /ban <playername|UUID> <reason> - bans the player
-* /rban <playername|UUID> <reason> - rollback and ban
+isDebug:   false
+logEnable: false
+logFile:   "plugins/MCBans/actions.log"
 
-E.G. /ban Firestarthe breaking my sign
-
-Global Ban Variations
-* /ban <playername|UUID> g <reason> - global ban
-* /gban <playername|UUID> <reason> - global ban
-* /rban <playername|UUID> g <reason> - rollback and global ban
-
-E.G. /ban g Firestarthe griefing
-
-Temporary Ban Variations
-* /ban <playername|UUID> t <int> <m/h/d> <reason> - temp bans a player
-* /tban <playername|UUID> <int> <m/h/d> <reason> - temp bans a player
-* /rban <playername|UUID> t <int> <m/h/d> <reason> - temp bans a player and rolls them back
-
-E.G. /tban Firestarthe 15 m you are banned for 15 minutes
-
-IP Ban Variations
-* /banip <IP> [reason] - bans an IP address
-
-Misc Commands
-* /lookup <playername|UUID> - checks players ban history (local/global bans)
-* /banlookup <banID> - checks ban details
-* /altlookup <playername|UUID> - checks alt accounts (premium server only!)
-* /kick <playername|UUID> [reason] - kicks a player from the game
-* /unban <playername|IP|UUID> - unbans the player/IP from your server
-* /mcbans - mcbans help and more information
-* /mcbs - change server settings
-
-Permissions
---------
-
-* mcbans.admin (default: op) - Admin privileges to mcbans
-* mcbans.ban.global (default: op) - Allow global ban player
-* mcbans.ban.local (default: op) - Allow local ban player
-* mcbans.ban.temp (default: op) - Allow temp ban player
-* mcbans.ban.rollback (default: op) - Allow use rban command
-* mcbans.ban.ip (default: op) - Allow use banip command
-* mcbans.ban.exempt (default: op) - Permission to exempt from bans
-* mcbans.unban (default: op) - Allow unban player
-* mcbans.view.alts (default: op) - Show notification of a players alts on connect
-* mcbans.view.bans (default: op) - Show previous ban information on player connect
-* mcbans.view.staff (default: true) - Show notification of a mcbans staff on connect
-* mcbans.hideview (default: false) - Hide player view alts/previous bans on connect
-* mcbans.lookup.player (default: op) - Allow lookup player ban history
-* mcbans.lookup.ban (default: op) - Allow lookup ban details
-* mcbans.lookup.alt (default: op) - Allow lookup alt account
-* mcbans.kick (default: op) - Allow kick player
-* mcbans.kick.exempt (default: op) - Permission to exempt from kicks
-* mcbans.maxalts.exempt (default: op) - Permission to exempt from max alt account disconnect
-
-
-
-
-Docker Images and Kubernetes
---------
-
-This project includes Docker images for testing the MCBans API:
-
-1. **mcbans-main**: A simple test that connects to the MCBans API and verifies the connection
-2. **mcbans-bantest**: A more comprehensive test that bans a player, checks the ban status, and then unbans the player
-
-### Running with Kubernetes
-
-A Kubernetes CronJob configuration is provided in `kubernetes-jobs.yaml`. This file defines two CronJobs that run every hour:
-- `mcbans-main-cronjob`: Runs the Main class to test API connectivity every hour
-- `mcbans-bantest-cronjob`: Runs the BanTest class to test ban functionality every hour
-
-To apply the configuration to your Kubernetes cluster:
-
-```bash
-# Apply the configuration
-kubectl apply -f kubernetes-jobs.yaml
-
-# Check the status of the CronJobs
-kubectl get cronjobs
-
-# Check the status of the Jobs created by the CronJobs
-kubectl get jobs
-
-# View logs from a job pod (replace JOB_POD_NAME with the actual pod name)
-kubectl logs JOB_POD_NAME
-
-# Delete the CronJobs when done
-kubectl delete -f kubernetes-jobs.yaml
+failsafe: false   # Deny login if API AND local cache both say unknown
 ```
 
-You can customize the API key and other parameters by editing the `args` section in the YAML file before applying. You can also modify the schedule by changing the `schedule` field in the CronJob specification (default is "0 * * * *", which runs at minute 0 of every hour).
+## Commands
+
+| Command | Aliases | Permission | Description |
+|---------|---------|------------|-------------|
+| `/ban <player> [reason]` | | `mcbans.ban.local` | Local ban |
+| `/ban <player> g [reason]` | `/gban` | `mcbans.ban.global` | Global ban |
+| `/ban <player> t <n> <m\|h\|d\|w> [reason]` | `/tban` | `mcbans.ban.temp` | Temp ban |
+| `/unban <player\|IP\|UUID>` | | `mcbans.unban` | Unban |
+| `/kick <player> [reason]` | | `mcbans.kick` | Kick |
+| `/banip <ip> [reason]` | `/ipban` | `mcbans.ban.ip` | IP ban |
+| `/lookup <player\|UUID>` | `/lup` | `mcbans.lookup.player` | Player history |
+| `/banlookup <id>` | `/blup` | `mcbans.lookup.ban` | Ban details |
+| `/altlookup <player\|UUID>` | `/alup` | `mcbans.lookup.alt` | Alt accounts |
+| `/mcbans [reload\|sync\|help]` | | `mcbans.admin` | Admin commands |
+
+## Permissions
+
+| Permission | Default | Description |
+|-----------|---------|-------------|
+| `mcbans.admin` | op | Full admin access |
+| `mcbans.ban.global` | op | Issue global bans |
+| `mcbans.ban.local` | op | Issue local bans |
+| `mcbans.ban.temp` | op | Issue temp bans |
+| `mcbans.ban.ip` | op | Ban IPs |
+| `mcbans.ban.exempt` | op | Exempt from bans |
+| `mcbans.unban` | op | Unban players |
+| `mcbans.kick` | op | Kick players |
+| `mcbans.kick.exempt` | op | Exempt from kicks |
+| `mcbans.view.bans` | op | See ban info on join |
+| `mcbans.view.alts` | op | See alt alerts on join |
+| `mcbans.lookup.player` | op | Use /lookup |
+| `mcbans.lookup.ban` | op | Use /banlookup |
+| `mcbans.lookup.alt` | op | Use /altlookup |
+| `mcbans.announce` | op | Receive broadcast announcements |
+
+## Architecture
+
+```
+Player Login (AsyncPlayerPreLoginEvent)
+  └── PvPIndexApiClient.getBanStatus(uuid)   [3 s timeout]
+        ├── API available → upsert to SQLite, allow/deny login
+        └── API timeout  → fallback BanDao.findActiveBan(uuid)
+
+/ban command
+  └── Ban.run()
+        ├── BanDao.insertOfflineBan(...)      [immediate, always]
+        └── PvPIndexApiClient.ban(...)        [best-effort, async]
+              ├── success → BanDao.markSynced(uuid)
+              └── failure → left in is_synced=0 queue
+
+BanSync thread (background, every syncInterval minutes)
+  ├── uploadUnsynced()   — push is_synced=0 bans to API
+  └── downloadDelta()    — pull bans updated since lastSyncAt
+```
+
+## Development
+
+```bash
+# Build fat JAR
+mvn clean package
+
+# Checkstyle only
+mvn checkstyle:check
+
+# Run tests
+mvn test
+
+# Full verify (checkstyle + compile + test + coverage report)
+mvn verify
+```
+
+Coverage reports are generated at `target/site/jacoco/index.html`.
+
+## CI / CD
+
+GitHub Actions runs on every push and PR:
+
+| Job | Trigger | What it does |
+|-----|---------|-------------|
+| `checkstyle` | push / PR | Runs `mvn checkstyle:check` |
+| `test` | after checkstyle passes | Compiles, runs JUnit 5 tests, uploads coverage to Codecov |
+
+Set the `CODECOV_TOKEN` secret in your GitHub repository settings to enable coverage reporting.
+
+## Changelog
+
+See [CHANGELOG.txt](CHANGELOG.txt).
+
+## License
+
+Distributed under the terms of the original MCBans license. See [LICENSE](LICENSE).

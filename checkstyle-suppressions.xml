@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+        "-//Checkstyle//DTD SuppressionFilter Configuration 1.0//EN"
+        "https://checkstyle.org/dtds/suppressions_1_0.dtd">
+
+<!--
+    Suppress checkstyle violations in legacy files that are not being refactored.
+    New code in api/, storage/, and the rewritten plugin files must pass without suppression
+    (with the narrow exceptions noted below).
+-->
+<suppressions>
+
+    <!-- ===== FULLY SUPPRESS ALL LEGACY INFRASTRUCTURE ===== -->
+
+    <!-- Legacy plugin files — not being refactored -->
+    <suppress files="plugin[\\/]ConfigurationManager\.java" checks=".*"/>
+    <suppress files="plugin[\\/]ActionLog\.java"            checks=".*"/>
+    <suppress files="plugin[\\/]BanType\.java"              checks=".*"/>
+    <suppress files="plugin[\\/]I18n\.java"                 checks=".*"/>
+
+    <!-- All command implementations — legacy code, high churn risk -->
+    <suppress files="plugin[\\/]commands[\\/].*\.java"      checks=".*"/>
+
+    <!-- Event classes — legacy struct with tab-indented mixed style -->
+    <suppress files="plugin[\\/]events[\\/].*\.java"        checks=".*"/>
+
+    <!-- Utility helpers — legacy indent style -->
+    <suppress files="plugin[\\/]util[\\/].*\.java"          checks=".*"/>
+
+    <!-- Permission system — legacy -->
+    <suppress files="plugin[\\/]permission[\\/].*\.java"    checks=".*"/>
+
+    <!-- Public API surface — external consumers, keep stable -->
+    <suppress files="plugin[\\/]api[\\/]MCBansAPI\.java"    checks=".*"/>
+
+    <!-- Request classes -->
+    <suppress files="plugin[\\/]request[\\/]Kick\.java"     checks=".*"/>
+
+    <!-- General utilities (utils/, not plugin/util/) -->
+    <suppress files="utils[\\/].*\.java"                    checks=".*"/>
+
+    <!-- Exception classes -->
+    <suppress files="plugin[\\/]exception[\\/].*\.java"     checks=".*"/>
+
+    <!-- ===== NARROW SUPPRESSIONS FOR NEW CODE ===== -->
+
+    <!-- camelCase legacy package directories — not renaming (would break all imports) -->
+    <suppress files="callBacks[\\/].*\.java"       checks="PackageName"/>
+    <suppress files="bukkitListeners[\\/].*\.java" checks="PackageName"/>
+
+    <!-- Text blocks cause false-positive Indentation violations in Checkstyle 10.x -->
+    <suppress files="storage[\\/]StorageManager\.java" checks="Indentation"/>
+    <suppress files="storage[\\/]BanDao\.java"         checks="Indentation"/>
+
+    <!-- JUnit 5 test method naming convention uses underscores (methodName_whenCondition_thenResult) -->
+    <suppress files="src[\\/]test[\\/].*\.java" checks="MethodName"/>
+
+    <!-- Test schema setup uses text blocks — same Checkstyle 10.x false positive -->
+    <suppress files="BanDaoTest\.java" checks="Indentation"/>
+
+</suppressions>

@@ -1,117 +1,109 @@
-##  Plugin Information  ##
 name: MCBans
-main: com.mcbans.plugin.MCBans
-version: 5.1.1
-api-version: 1.18
-description: A global banning solution
-website: http://mcbans.com/
-softdepend: [LogBlock, HawkEye, CoreProtect, Vault, PermissionsEx]
-author: Firestar
+main: com.pvpindex.bans.plugin.MCBans
+version: 5.2.0
+api-version: 1.21
+description: PvPIndex global banning solution for Minecraft
+website: https://pvpindex.com
+authors: [ Firestar, Syamn, Corpdraco, PvPIndex ]
+
+softdepend: [ Vault ]
+
 commands:
   kick:
-    description: kicks a user
-    usage: /<command> <playername|UUID> [reason]
+    description: Kick a player
+    usage: /<command> <player|UUID> [reason]
   ban:
-    description: ban a user
-    usage: /<command> <playername|UUID> [-g/-t/reason] [reason]
+    description: Local or global ban
+    usage: /<command> <player|UUID> [-g|-t|reason] [reason]
   globalban:
-    description: global bans a user
-    aliases: [gban]
-    usage: /<command> <playername|UUID> [reason]
-  rban:
-    description: roll back bans
-    usage: /<command> <playername|UUID> [-g/-t/reason] [reason]
-  namelookup:
-    description: history of a players UUID
-    aliases: [nlup]
-    usage: /<command> <playername|UUID>
-  unban:
-    description: unban a user
-    usage: /<command> <playername|UUID>
+    description: Globally ban a player
+    aliases: [ gban ]
+    usage: /<command> <player|UUID> [reason]
   tempban:
-    description: temporary ban user
-    aliases: [tban]
-    usage: /<command> <playername|UUID> <duration> <m(minutes) or h(hours) or d(days) or w(weeks)> [reason]
+    description: Temporarily ban a player
+    aliases: [ tban ]
+    usage: /<command> <player|UUID> <duration> <m|h|d|w> [reason]
+  rban:
+    description: Ban a player (rollback is a no-op — kept for compatibility)
+    usage: /<command> <player|UUID> [-g|-t|reason] [reason]
   banip:
-    description: bans an IP address
-    aliases: [ipban]
+    description: Ban an IP address
+    aliases: [ ipban ]
     usage: /<command> <ip> [reason]
+  unban:
+    description: Unban a player or IP
+    usage: /<command> <player|UUID|IP>
   lookup:
-    description: lookup a player information
-    aliases: [lup]
-    usage: /<command> <playername|UUID>
+    description: Look up a player's ban history
+    aliases: [ lup ]
+    usage: /<command> <player|UUID>
   banlookup:
-    description: lookup a ban information
-    aliases: [blup]
+    description: Look up a ban by ID
+    aliases: [ blup ]
     usage: /<command> <banID>
   altlookup:
-    description: lookup a player alt accounts
-    aliases: [alup, alt]
-    usage: /<command> <playername|UUID>
+    description: Look up a player's alternate accounts
+    aliases: [ alup, alt ]
+    usage: /<command> <player|UUID>
   mcbans:
-    description: mcbans functions
-    usage: /<command> <function>
+    description: MCBans admin commands (reload, sync, help)
+    usage: /<command> [reload|sync|help]
   mcbs:
-    description: mcbans server settings
+    description: MCBans server settings (deprecated — use config.yml)
     usage: /<command> <setting> <value>
+
 permissions:
-  mcbans.announce:
-    description: Announces bans and kicks to anyone with this permission
-    default: op
   mcbans.admin:
-    description: Admin privileges to mcbans, access to admin commands
+    description: Full admin access to MCBans
     default: op
   mcbans.ban.global:
-    description: Permission to use global ban command
+    description: Issue global bans
     default: op
   mcbans.ban.local:
-    description: Permission to use local ban command
+    description: Issue local bans
     default: op
   mcbans.ban.temp:
-    description: Permission to use temp ban command
+    description: Issue temporary bans
     default: op
   mcbans.ban.rollback:
-    description: Gives rban commands
+    description: Use /rban (rollback + ban)
     default: op
   mcbans.ban.ip:
-    description: Gives banip command
+    description: Ban IP addresses
     default: op
   mcbans.ban.exempt:
-    description: Permission to exempt from bans
+    description: Exempt from bans
     default: op
   mcbans.unban:
-    description: Permission to use unban command
+    description: Unban players
     default: op
-  mcbans.view.bans:
-    description: View ban information on user joining
-    default: op
-  mcbans.view.alts:
-    description: show notification of a players alts on connect
-    default: op
-  mcbans.view.previous:
-    description: show notification of a players previous names on connect
-    default: op
-  mcbans.view.proxy:
-    description: show notification of a players using proxies on connect
-    default: op
-  mcbans.view.staff:
-    description: show notification of a mcbans staff on connect
-    default: true
-  mcbans.hideview:
-    description: Hide notification of previous bans/alts on connect
-    default: false
   mcbans.kick:
-    description: Permission to use kick command
+    description: Kick players
     default: op
   mcbans.kick.exempt:
-    description: Permission to exempt from kicks
+    description: Exempt from kicks
     default: op
+  mcbans.view.bans:
+    description: See ban info on player join
+    default: op
+  mcbans.view.alts:
+    description: See alt-account notifications on join
+    default: op
+  mcbans.view.staff:
+    description: See MCBans staff notifications
+    default: true
+  mcbans.hideview:
+    description: Suppress join notifications for self
+    default: false
   mcbans.lookup.player:
-    description: Permission to use lookup command
+    description: Use /lookup
     default: op
   mcbans.lookup.ban:
-    description: Permission to use banlookup command
+    description: Use /banlookup
     default: op
   mcbans.lookup.alt:
-    description: Permission to use altlookup command
+    description: Use /altlookup
+    default: op
+  mcbans.announce:
+    description: Receive ban/kick broadcast announcements
     default: op

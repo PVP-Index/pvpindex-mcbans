@@ -4,142 +4,199 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>mcbans</groupId>
+    <groupId>com.pvpindex.bans</groupId>
     <artifactId>pvpindex-mcbans</artifactId>
-    <!-- version is kept in version.txt; read at build time via flatten-maven-plugin or set manually -->
-    <version>5.1.14</version>
+    <version>5.2.0</version>
     <packaging>jar</packaging>
 
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!-- Paths to local JARs (relative to project root) -->
-        <libs.dir>${project.basedir}/libs</libs.dir>
-        <!-- Main class for exec:java -->
-        <mainClass>com.mcbans.test.Main</mainClass>
+        <!-- Versions -->
+        <paper.version>1.21.4-R0.1-SNAPSHOT</paper.version>
+        <sqlite.version>3.47.1.0</sqlite.version>
+        <gson.version>2.10.1</gson.version>
+        <junit.version>5.11.4</junit.version>
+        <mockbukkit.version>4.27.0</mockbukkit.version>
+        <checkstyle.version>10.21.4</checkstyle.version>
+        <jacoco.version>0.8.12</jacoco.version>
     </properties>
 
     <repositories>
         <repository>
-            <id>md-5-snapshots</id>
-            <url>https://repo.md-5.net/content/repositories/snapshots/</url>
-        </repository>
-        <repository>
-            <id>spigotmc-snapshots</id>
-            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
-        </repository>
-        <repository>
-            <id>sonatype-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <id>papermc</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
         <repository>
             <id>jitpack</id>
             <url>https://jitpack.io</url>
         </repository>
+        <repository>
+            <id>sonatype-snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <snapshots><enabled>true</enabled></snapshots>
+        </repository>
     </repositories>
 
     <dependencies>
-        <!-- Bukkit API -->
+        <!-- Paper API (provided by server at runtime) -->
         <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>bukkit</artifactId>
-            <version>1.15.2-R0.1-SNAPSHOT</version>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>${paper.version}</version>
             <scope>provided</scope>
         </dependency>
 
-        <!-- LogBlock -->
-        <dependency>
-            <groupId>de.diddiz</groupId>
-            <artifactId>logblock</artifactId>
-            <version>1.16.5.2-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <!-- VaultAPI -->
+        <!-- Vault (economy/permissions, provided by server) -->
         <dependency>
             <groupId>com.github.MilkBowl</groupId>
             <artifactId>VaultAPI</artifactId>
             <version>1.7</version>
             <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.bukkit</groupId>
+                    <artifactId>bukkit</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
-        <!-- Log4j -->
+        <!-- Gson (JSON parsing for API responses) -->
         <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>2.17.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>2.17.1</version>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>${gson.version}</version>
         </dependency>
 
-        <!-- Local JARs from libs/ -->
+        <!-- SQLite JDBC (local offline cache) -->
         <dependency>
-            <groupId>com.coresuite</groupId>
-            <artifactId>coreprotect</artifactId>
-            <version>2.0.9</version>
-            <scope>system</scope>
-            <systemPath>${libs.dir}/CoreProtect_2.0.9.jar</systemPath>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>${sqlite.version}</version>
         </dependency>
+
+        <!-- ===== Test dependencies ===== -->
+        <!-- JUnit 5 -->
         <dependency>
-            <groupId>com.hawkeyeplus</groupId>
-            <artifactId>hawkeye</artifactId>
-            <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${libs.dir}/HawkEye.jar</systemPath>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
         </dependency>
+
+        <!-- MockBukkit for Paper 1.21 -->
         <dependency>
-            <groupId>ru.tehkode</groupId>
-            <artifactId>PermissionsEx</artifactId>
-            <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${libs.dir}/PermissionsEx.jar</systemPath>
+            <groupId>org.mockbukkit.mockbukkit</groupId>
+            <artifactId>mockbukkit-v1.21</artifactId>
+            <version>${mockbukkit.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <!-- Shade all runtime dependencies into a fat JAR (for Bukkit plugin distribution) -->
+            <!-- Compile with Java 21 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <source>21</source>
+                    <target>21</target>
+                    <release>21</release>
+                </configuration>
+            </plugin>
+
+            <!-- Shade runtime deps into fat JAR (sqlite-jdbc, gson) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.5.1</version>
+                <version>3.6.0</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
+                        <goals><goal>shade</goal></goals>
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
-                            <!-- Exclude provided / system-scoped deps from the fat JAR -->
                             <artifactSet>
                                 <excludes>
-                                    <exclude>org.bukkit:bukkit</exclude>
-                                    <exclude>de.diddiz:logblock</exclude>
+                                    <exclude>io.papermc.paper:paper-api</exclude>
                                     <exclude>com.github.MilkBowl:VaultAPI</exclude>
-                                    <exclude>com.coresuite:coreprotect</exclude>
-                                    <exclude>com.hawkeyeplus:hawkeye</exclude>
-                                    <exclude>ru.tehkode:PermissionsEx</exclude>
+                                    <exclude>org.junit.jupiter:*</exclude>
+                                    <exclude>org.mockbukkit.mockbukkit:*</exclude>
                                 </excludes>
                             </artifactSet>
+                            <relocations>
+                                <relocation>
+                                    <pattern>org.sqlite</pattern>
+                                    <shadedPattern>com.pvpindex.bans.libs.sqlite</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.google.gson</pattern>
+                                    <shadedPattern>com.pvpindex.bans.libs.gson</shadedPattern>
+                                </relocation>
+                            </relocations>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
 
-            <!-- exec:java to run standalone test classes (replaces `./gradlew run --args=...`) -->
+            <!-- Checkstyle -->
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>3.1.1</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.6.0</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.puppycrawl.tools</groupId>
+                        <artifactId>checkstyle</artifactId>
+                        <version>${checkstyle.version}</version>
+                    </dependency>
+                </dependencies>
                 <configuration>
-                    <mainClass>${mainClass}</mainClass>
-                    <includeProjectDependencies>true</includeProjectDependencies>
-                    <includePluginDependencies>false</includePluginDependencies>
+                    <configLocation>checkstyle.xml</configLocation>
+                    <suppressionsLocation>checkstyle-suppressions.xml</suppressionsLocation>
+                    <consoleOutput>true</consoleOutput>
+                    <failsOnError>true</failsOnError>
+                    <failOnViolation>true</failOnViolation>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                    <violationSeverity>warning</violationSeverity>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>checkstyle</id>
+                        <phase>validate</phase>
+                        <goals><goal>check</goal></goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- JaCoCo coverage -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals><goal>prepare-agent</goal></goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals><goal>report</goal></goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Surefire for JUnit 5 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.2</version>
+                <configuration>
+                    <useModulePath>false</useModulePath>
                 </configuration>
             </plugin>
         </plugins>
