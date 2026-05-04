@@ -1,14 +1,23 @@
 # PvPIndex MCBans
 
-A Minecraft Paper plugin that enforces bans through the [PvPIndex](https://pvpindex.com) REST API, with full offline fallback via a local SQLite cache.
+> **Fork notice:** PvPIndex MCBans is a refactored fork of the original [MCBans](https://dev.bukkit.org/projects/mcbans) plugin by the MCBans team. The core ban-sharing concept, TCP protocol, command structure, and permission layout originate from that project. We have modernised the codebase for Java 21 and Paper 1.21+, replaced the legacy MCBans API backend with the PvPIndex REST API, split the project into a multi-module Maven build, and published the API client module on JitPack. Full credit to the original MCBans authors and contributors.
 
-## Features
+Ban management plugin for Paper 1.21 servers. Connects your server to the [PvPIndex](https://pvpindex.com) global ban network so that players banned on one participating server are automatically blocked everywhere else — while still giving you complete control over local bans and storage.
 
-- **Global & local bans** — synced to the PvPIndex API in real time
-- **Temp bans** — with expiry times, auto-expired locally if the API is unavailable
-- **Offline resilience** — bans issued while the API is down are queued and pushed at the next sync cycle
-- **Background delta sync** — downloads ban changes from the API on a configurable interval (default 60 min)
-- **API-first, cache-fallback** — login checks hit the API first (3 s timeout), then fall back to SQLite
+## Download
+
+Get the latest JAR from the [GitHub Releases](https://github.com/PVP-Index/pvpindex-mcbans/releases) page.
+
+## Quick start
+
+1. Drop `pvpindex-mcbans-<version>.jar` into your server's `plugins/` folder.
+2. Restart the server — `plugins/MCBans/config.yml` is generated with defaults.
+3. [Apply for an API key](https://pvpindex.com/apply), then set it:
+   ```yaml
+   pvpindex:
+     apiKey: "your-bearer-token-here"
+   ```
+4. Run `/mcbans reload` or restart.
 
 ## Requirements
 
@@ -16,130 +25,75 @@ A Minecraft Paper plugin that enforces bans through the [PvPIndex](https://pvpin
 |-----------|---------|
 | Java | 21+ |
 | Paper | 1.21+ |
-| PvPIndex API key | [Apply here](https://pvpindex.com/apply) |
+| PvPIndex API key | [pvpindex.com/apply](https://pvpindex.com/apply) |
 
-## Installation
+Optional: [Vault](https://dev.bukkit.org/projects/vault) for non-OP permission integration.
 
-1. Drop `pvpindex-mcbans-*.jar` into your server's `plugins/` folder.
-2. Start the server once to generate `plugins/MCBans/config.yml`.
-3. Set your API key:
-   ```yaml
-   pvpindex:
-     apiKey: "your-bearer-token-here"
-   ```
-4. Restart or `/mcbans reload`.
+## Features
 
-## Configuration (`config.yml`)
+- **Global & local bans** — synced to the PvPIndex network in real time
+- **Temp bans** — time-limited with auto-expiry
+- **Offline resilience** — bans issued during API outages are queued and pushed on recovery
+- **Delta sync** — downloads ban changes on a configurable background interval (default 60 min)
+- **Multiple storage backends** — SQLite (default), MySQL/MariaDB, PostgreSQL
+- **Developer API** — lightweight [JitPack client](https://mcbans.pvpindex.com) for other plugins to query ban status without depending on MCBans being installed
 
-```yaml
-pvpindex:
-  apiUrl:       https://api.pvpindex.com   # API base URL
-  apiKey:       ""                          # Bearer token from PvPIndex dashboard
-  syncInterval: 60                          # Delta-sync interval in minutes
+## Documentation
 
-prefix:   "&cMCBans &8>&r "
-language: default
-permission: SuperPerms   # Vault | SuperPerms | OPs
+Full documentation is available at **[docs.pvpindex.com/mcbans](https://docs.pvpindex.com/mcbans/overview)**:
 
-defaultLocal: "You have been banned!"
-defaultTemp:  "You have been temporarily banned!"
-defaultKick:  "You have been kicked!"
+- [Overview](https://docs.pvpindex.com/mcbans/overview)
+- [Installation](https://docs.pvpindex.com/mcbans/installation)
+- [Configuration](https://docs.pvpindex.com/mcbans/configuration)
+- [Commands](https://docs.pvpindex.com/mcbans/commands)
+- [Permissions](https://docs.pvpindex.com/mcbans/permissions)
+- [Developer API](https://docs.pvpindex.com/mcbans/developer-api)
 
-isDebug:   false
-logEnable: false
-logFile:   "plugins/MCBans/actions.log"
-
-failsafe: false   # Deny login if API AND local cache both say unknown
-```
-
-## Commands
-
-| Command | Aliases | Permission | Description |
-|---------|---------|------------|-------------|
-| `/ban <player> [reason]` | | `mcbans.ban.local` | Local ban |
-| `/ban <player> g [reason]` | `/gban` | `mcbans.ban.global` | Global ban |
-| `/ban <player> t <n> <m\|h\|d\|w> [reason]` | `/tban` | `mcbans.ban.temp` | Temp ban |
-| `/unban <player\|IP\|UUID>` | | `mcbans.unban` | Unban |
-| `/kick <player> [reason]` | | `mcbans.kick` | Kick |
-| `/banip <ip> [reason]` | `/ipban` | `mcbans.ban.ip` | IP ban |
-| `/lookup <player\|UUID>` | `/lup` | `mcbans.lookup.player` | Player history |
-| `/banlookup <id>` | `/blup` | `mcbans.lookup.ban` | Ban details |
-| `/altlookup <player\|UUID>` | `/alup` | `mcbans.lookup.alt` | Alt accounts |
-| `/mcbans [reload\|sync\|help]` | | `mcbans.admin` | Admin commands |
-
-## Permissions
-
-| Permission | Default | Description |
-|-----------|---------|-------------|
-| `mcbans.admin` | op | Full admin access |
-| `mcbans.ban.global` | op | Issue global bans |
-| `mcbans.ban.local` | op | Issue local bans |
-| `mcbans.ban.temp` | op | Issue temp bans |
-| `mcbans.ban.ip` | op | Ban IPs |
-| `mcbans.ban.exempt` | op | Exempt from bans |
-| `mcbans.unban` | op | Unban players |
-| `mcbans.kick` | op | Kick players |
-| `mcbans.kick.exempt` | op | Exempt from kicks |
-| `mcbans.view.bans` | op | See ban info on join |
-| `mcbans.view.alts` | op | See alt alerts on join |
-| `mcbans.lookup.player` | op | Use /lookup |
-| `mcbans.lookup.ban` | op | Use /banlookup |
-| `mcbans.lookup.alt` | op | Use /altlookup |
-| `mcbans.announce` | op | Receive broadcast announcements |
-
-## Architecture
-
-```
-Player Login (AsyncPlayerPreLoginEvent)
-  └── PvPIndexApiClient.getBanStatus(uuid)   [3 s timeout]
-        ├── API available → upsert to SQLite, allow/deny login
-        └── API timeout  → fallback BanDao.findActiveBan(uuid)
-
-/ban command
-  └── Ban.run()
-        ├── BanDao.insertOfflineBan(...)      [immediate, always]
-        └── PvPIndexApiClient.ban(...)        [best-effort, async]
-              ├── success → BanDao.markSynced(uuid)
-              └── failure → left in is_synced=0 queue
-
-BanSync thread (background, every syncInterval minutes)
-  ├── uploadUnsynced()   — push is_synced=0 bans to API
-  └── downloadDelta()    — pull bans updated since lastSyncAt
-```
-
-## Development
+## Building
 
 ```bash
-# Build fat JAR
-mvn clean package
+# Full build + tests
+mvn verify
+
+# Plugin JAR only (skips tests)
+mvn package -DskipTests
 
 # Checkstyle only
 mvn checkstyle:check
-
-# Run tests
-mvn test
-
-# Full verify (checkstyle + compile + test + coverage report)
-mvn verify
 ```
 
-Coverage reports are generated at `target/site/jacoco/index.html`.
+The fat JAR is output to `pvpindex-mcbans-plugin/target/pvpindex-mcbans-<version>.jar`.
 
-## CI / CD
+## Developer API (JitPack)
 
-GitHub Actions runs on every push and PR:
+Add the lightweight API client to your own plugin — no Bukkit dependency required:
 
-| Job | Trigger | What it does |
-|-----|---------|-------------|
-| `checkstyle` | push / PR | Runs `mvn checkstyle:check` |
-| `test` | after checkstyle passes | Compiles, runs JUnit 5 tests, uploads coverage to Codecov |
+```xml
+<!-- Maven -->
+<repositories>
+    <repository>
+        <id>jitpack</id>
+        <url>https://jitpack.io</url>
+    </repository>
+</repositories>
+<dependency>
+    <groupId>com.github.PVP-Index.pvpindex-mcbans</groupId>
+    <artifactId>pvpindex-mcbans-api</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
 
-Set the `CODECOV_TOKEN` secret in your GitHub repository settings to enable coverage reporting.
+See [Developer API docs](https://docs.pvpindex.com/mcbans/developer-api) for usage examples.
+
+## Credits
+
+PvPIndex MCBans is a refactored fork of the original **MCBans** plugin. Original project: <https://dev.bukkit.org/projects/mcbans>. The ban-sharing concept, TCP wire protocol, command set, and permission layout all originate from the MCBans team and their contributors. This fork modernises the codebase and replaces the legacy MCBans backend with the PvPIndex REST API.
 
 ## Changelog
 
-See [CHANGELOG.txt](CHANGELOG.txt).
+See [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 
 Distributed under the terms of the original MCBans license. See [LICENSE](LICENSE).
+
