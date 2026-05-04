@@ -49,8 +49,9 @@
     <suppress files="bukkitListeners[\\/].*\.java" checks="PackageName"/>
 
     <!-- Text blocks cause false-positive Indentation violations in Checkstyle 10.x -->
-    <suppress files="storage[\\/]StorageManager\.java" checks="Indentation"/>
-    <suppress files="storage[\\/]BanDao\.java"         checks="Indentation"/>
+    <suppress files="storage[\\/]StorageManager\.java"          checks="Indentation"/>
+    <suppress files="storage[\\/]BanDao\.java"                  checks="Indentation"/>
+    <suppress files="storage[\\/]backend[\\/].*\.java"          checks="Indentation"/>
 
     <!-- JUnit 5 test method naming convention uses underscores (methodName_whenCondition_thenResult) -->
     <suppress files="src[\\/]test[\\/].*\.java" checks="MethodName"/>
