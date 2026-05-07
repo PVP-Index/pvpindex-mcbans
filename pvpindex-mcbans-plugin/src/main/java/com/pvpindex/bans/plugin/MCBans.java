@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Plugin entry point — lifecycle is delegated to {@link Bootstrap};
+ * Plugin entry point - lifecycle is delegated to {@link Bootstrap};
  * shared state is held in {@link Registry}.
  */
 public class MCBans extends JavaPlugin {
@@ -56,7 +56,7 @@ public class MCBans extends JavaPlugin {
     }
 
     // -------------------------------------------------------------------------
-    // Static accessors (legacy API — delegate to Registry)
+    // Static accessors (legacy API - delegate to Registry)
     // -------------------------------------------------------------------------
 
     public static MCBans getInstance() {
@@ -113,7 +113,10 @@ public class MCBans extends JavaPlugin {
     }
 
     public void debug(String message) {
-        Registry.getDebugLogger().debug(message);
+        DebugLogger dl = Registry.getDebugLogger();
+        if (dl != null) {
+            dl.debug(message);
+        }
     }
 
     public MCBansAPI getAPI(Plugin plugin) {
@@ -121,7 +124,7 @@ public class MCBans extends JavaPlugin {
     }
 
     /**
-     * Replaces the API client — for unit testing only.
+     * Replaces the API client - for unit testing only.
      */
     void setApiClientForTesting(PvPIndexApiClient client) {
         Registry.setApiClient(client);
