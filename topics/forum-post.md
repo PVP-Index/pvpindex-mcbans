@@ -9,6 +9,8 @@
 - **Global & local bans** - issue a local ban (stays on your server) or a global ban synced to all connected servers in real time
 - **Temporary bans** - time-limited with auto-expiry in minutes, hours, days, or weeks
 - **IP bans** - ban by IP address to block VPN abuse and ban evasion
+- **Reason presets** - define shorthand keys in config (`#hacks`, `#toxicity`) that expand to full reason strings; extended form supports a `default-duration` for temp bans; case-insensitive with tab-completion
+- **Customizable kick messages** - per-type templates (`global`, `local`, `temp`, `failsafe`) with `{reason}`, `{admin}`, `{expires}`, and `{appeal_url}` placeholders
 - **Offline resilience** - bans issued during API outages are queued and pushed on recovery; `failsafe` mode can block all logins when the API is unreachable
 - **Delta sync** - downloads only ban changes on a configurable interval (default 60 min)
 - **Multiple storage backends** - SQLite (default, zero-config), MySQL/MariaDB, PostgreSQL
@@ -76,6 +78,7 @@ pvpindex:
 | `/mcbans` | Show help |
 | `/mcbans reload` | Reload config and language files |
 | `/mcbans sync` | Force an immediate push + download cycle |
+| `/mcbans presets` | List all configured reason presets (`mcbans.ban.local`) |
 
 ---
 
@@ -94,6 +97,23 @@ language:   default
 permission: SuperPerms        # SuperPerms | Vault
 
 failsafe: false               # true = block all logins when API unreachable
+
+# Optional: customise the message shown to banned/kicked players
+kick-message:
+  global:   "&cYou are globally banned.\n&7Reason: {reason}\n&7Appeal: {appeal_url}"
+  local:    "&cYou are banned from this server.\n&7Reason: {reason}"
+  temp:     "&cYou are temporarily banned until {expires}.\n&7Reason: {reason}"
+  failsafe: "&cUnable to verify your ban status. Try again later."
+
+# Optional: shorthand reason keys usable in all ban commands
+reason-presets:
+  hacks:
+    reason: "Hacking / using unauthorized modifications"
+  toxicity:
+    reason: "Toxic behaviour"
+  farming:
+    reason: "Ban/ELO farming"
+    default-duration: "7d"
 ```
 
 → Full reference: [docs.pvpindex.com/mcbans/configuration](https://docs.pvpindex.com/mcbans/configuration)
@@ -114,7 +134,7 @@ Add the lightweight API client to your own plugin - no Bukkit dependency require
 <dependency>
     <groupId>com.github.PVP-Index.pvpindex-mcbans</groupId>
     <artifactId>pvpindex-mcbans-api</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
