@@ -98,6 +98,9 @@ public class BanSync extends Thread {
      */
     private void uploadUnsynced() {
         StorageBackend dao = plugin.getBanDao();
+        if (dao == null) {
+            return;
+        }
         List<LocalBan> unsynced = dao.findUnsynced();
         for (LocalBan ban : unsynced) {
             if (!running) {
@@ -129,6 +132,9 @@ public class BanSync extends Thread {
     /** Download paginated delta from the API and update the local cache. */
     private void downloadDelta() {
         StorageBackend dao = plugin.getBanDao();
+        if (dao == null) {
+            return;
+        }
         String lastSync = dao.getMeta("lastSyncAt").orElse(null);
 
         int page = 1;

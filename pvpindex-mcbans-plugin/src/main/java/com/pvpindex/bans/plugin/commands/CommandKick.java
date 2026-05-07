@@ -9,6 +9,9 @@
  */
 package com.pvpindex.bans.plugin.commands;
 
+import java.util.List;
+
+import com.pvpindex.bans.plugin.MCBans;
 import com.pvpindex.bans.plugin.request.Kick;
 import org.bukkit.command.CommandSender;
 
@@ -37,6 +40,13 @@ public class CommandKick extends BaseCommand{
         // Start
         Kick kickPlayer = new Kick(plugin, target, targetUUID, senderName, senderUUID, reason, false);
         kickPlayer.run();
+    }
+
+    @Override
+    protected List<String> tabComplete(MCBans plugin, CommandSender sender, String cmd, String[] preArgs) {
+        // position 0 = player name (let Paper suggest online players)
+        // position >= 1 = free-text reason (suppress player-name fallback)
+        return preArgs.length >= 2 ? List.of() : null;
     }
 
     @Override
