@@ -1,4 +1,4 @@
-[CENTER][IMG]https://pvpindex.com/og-default.png[/IMG]
+[CENTER][IMG]https://cdn.modrinth.com/data/8wyK7V60/e6b92fbb3ff1d42e72229b57873a2c0ffc497444.gif[/IMG]
 
 [SIZE=6][B]PvPIndex MCBans[/B][/SIZE]
 [SIZE=4]Global Ban Management for Paper Servers[/SIZE][/CENTER]
@@ -7,7 +7,7 @@
 
 [B]PvPIndex MCBans[/B] connects your Paper server to the [URL='https://mcbans.pvpindex.com']mcbans.pvpindex.com[/URL] global ban network. Players banned on any participating server are automatically blocked everywhere else - while you keep full control over local bans, storage backends, and permission levels.
 
-[HR][/HR]
+[IMG]https://cdn.modrinth.com/data/8wyK7V60/images/2538f3b59165fa0297e51e61209d0e540cbdfee2_350.webp[/IMG]
 
 [SIZE=5][B]Features[/B][/SIZE]
 
@@ -15,7 +15,9 @@
 [*][B]Global & local bans[/B] - issue a local ban (stays on your server) or a global ban (synced to all connected servers in real time)
 [*][B]Temporary bans[/B] - time-limited bans with auto-expiry in minutes, hours, days, or weeks
 [*][B]IP bans[/B] - ban by IP address to block VPN abuse and ban evasion
-[*][B]Offline resilience[/B] - bans issued during API outages are queued and pushed on recovery; the [ICODE]failsafe[/ICODE] option can also block all logins when the API is unreachable
+[*][B]Reason presets[/B] - define shorthand keys in config ([ICODE]#hacks[/ICODE], [ICODE]#toxicity[/ICODE]) that expand to full reason strings; extended form supports a [ICODE]default-duration[/ICODE] for temp bans; case-insensitive with tab-completion
+[*][B]Customizable kick messages[/B] - per-type templates ([ICODE]global[/ICODE], [ICODE]local[/ICODE], [ICODE]temp[/ICODE], [ICODE]failsafe[/ICODE]) with [ICODE]{reason}[/ICODE], [ICODE]{admin}[/ICODE], [ICODE]{expires}[/ICODE], and [ICODE]{appeal_url}[/ICODE] placeholders
+[*][B]Offline resilience[/B] - bans issued during API outages are queued and pushed on recovery; the [ICODE]failsafe[/ICODE] option can also block all banned logins through local database when the API is unreachable
 [*][B]Delta sync[/B] - downloads only ban changes on a configurable background interval (default 60 min), keeping the local database lightweight
 [*][B]Multiple storage backends[/B] - SQLite (default, zero-config), MySQL/MariaDB, PostgreSQL
 [*][B]Alt-account detection[/B] - [ICODE]/altlookup[/ICODE] surfaces known alternate accounts via the PvPIndex API (premium)
@@ -23,8 +25,6 @@
 [*][B]Vault integration[/B] - optional; swap the permission backend to Vault in one config line
 [*][B]Fully translatable[/B] - swap the [ICODE]language[/ICODE] key to load a different locale file
 [/LIST]
-
-[HR][/HR]
 
 [SIZE=5][B]Requirements[/B][/SIZE]
 
@@ -51,8 +51,6 @@
 [/TR]
 [/TABLE]
 
-[HR][/HR]
-
 [SIZE=5][B]Installation[/B][/SIZE]
 
 [LIST=1]
@@ -66,8 +64,6 @@
 [/LIST]
 
 → Full guide: [URL='https://docs.pvpindex.com/mcbans/installation']docs.pvpindex.com/mcbans/installation[/URL]
-
-[HR][/HR]
 
 [SIZE=5][B]Commands[/B][/SIZE]
 
@@ -155,9 +151,11 @@
 [TD][ICODE]/mcbans sync[/ICODE][/TD]
 [TD]Force an immediate push + download cycle[/TD]
 [/TR]
+[TR]
+[TD][ICODE]/mcbans presets[/ICODE][/TD]
+[TD]List all configured reason presets ([ICODE]mcbans.ban.local[/ICODE])[/TD]
+[/TR]
 [/TABLE]
-
-[HR][/HR]
 
 [SIZE=5][B]Configuration Snapshot[/B][/SIZE]
 
@@ -172,11 +170,26 @@ storage:
 language:   default
 permission: SuperPerms        # SuperPerms | Vault
 
-failsafe: false               # true = block all logins when API unreachable[/CODE]
+failsafe: false               # true = block all logins when API unreachable
+
+# Optional: customise the message shown to banned/kicked players
+kick-message:
+  global:   "&cYou are globally banned.\n&7Reason: {reason}\n&7Appeal: {appeal_url}"
+  local:    "&cYou are banned from this server.\n&7Reason: {reason}"
+  temp:     "&cYou are temporarily banned until {expires}.\n&7Reason: {reason}"
+  failsafe: "&cUnable to verify your ban status. Try again later."
+
+# Optional: shorthand reason keys usable in all ban commands
+reason-presets:
+  hacks:
+    reason: "Hacking / using unauthorized modifications"
+  toxicity:
+    reason: "Toxic behaviour"
+  farming:
+    reason: "Ban/ELO farming"
+    default-duration: "7d"[/CODE]
 
 → Full reference: [URL='https://docs.pvpindex.com/mcbans/configuration']docs.pvpindex.com/mcbans/configuration[/URL]
-
-[HR][/HR]
 
 [SIZE=5][B]Developer API (JitPack)[/B][/SIZE]
 
@@ -191,12 +204,10 @@ Add the lightweight API client to your own plugin - no Bukkit dependency require
 <dependency>
     <groupId>com.github.PVP-Index.pvpindex-mcbans</groupId>
     <artifactId>pvpindex-mcbans-api</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
 </dependency>[/CODE]
 
 → [URL='https://docs.pvpindex.com/mcbans/developer-api']Developer API documentation[/URL]
-
-[HR][/HR]
 
 [SIZE=5][B]Links[/B][/SIZE]
 
@@ -207,8 +218,6 @@ Add the lightweight API client to your own plugin - no Bukkit dependency require
 [*][B]Issue tracker[/B] - [URL='https://github.com/PVP-Index/pvpindex-mcbans/issues']github.com/PVP-Index/pvpindex-mcbans/issues[/URL]
 [*][B]Apply for an API key[/B] - [URL='https://pvpindex.com/apply']pvpindex.com/apply[/URL]
 [/LIST]
-
-[HR][/HR]
 
 [SIZE=5][B]Credits[/B][/SIZE]
 
