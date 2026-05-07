@@ -20,6 +20,7 @@ import com.pvpindex.bans.plugin.commands.mcbans.McBansGetSubcommand;
 import com.pvpindex.bans.plugin.commands.mcbans.McBansHelpSubcommand;
 import com.pvpindex.bans.plugin.commands.mcbans.McBansPermsSubcommand;
 import com.pvpindex.bans.plugin.commands.mcbans.McBansPingSubcommand;
+import com.pvpindex.bans.plugin.commands.mcbans.McBansPresetsSubcommand;
 import com.pvpindex.bans.plugin.commands.mcbans.McBansReloadSubcommand;
 import com.pvpindex.bans.plugin.commands.mcbans.McBansStaffSubcommand;
 import com.pvpindex.bans.plugin.commands.mcbans.McBansSyncSubcommand;
@@ -74,6 +75,10 @@ public class CommandMCBans extends BaseCommand {
                 args.remove(0);
                 new McBansReloadSubcommand(plugin, sender, senderPlayer, config, args).execute();
                 break;
+            case "presets":
+                args.remove(0);
+                new McBansPresetsSubcommand(plugin, sender, senderPlayer, config, args).execute();
+                break;
             case "staff":
                 args.remove(0);
                 new McBansStaffSubcommand(plugin, sender, senderPlayer, config, args).execute();
@@ -101,6 +106,7 @@ public class CommandMCBans extends BaseCommand {
             options.add("sync");
             options.add("get");
             options.add("reload");
+            options.add("presets");
             if (sender != null && false) {
                 options.add("staff");
             }

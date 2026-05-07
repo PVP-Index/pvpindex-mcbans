@@ -5,6 +5,9 @@
 # - API:      https://api.pvpindex.com
 ##
 
+# Internal config version - do not edit.
+ConfigVersion: 3
+
 # prefix:
 #   Prefix for MCBans messages shown to players.
 # DEFAULT: "&c[PvPIndex MCBans] &r"
@@ -75,7 +78,7 @@ language: default
 # Permissions
 ##
 
-# permission: Permission backend — Vault, SuperPerms, OPs
+# permission: Permission backend - Vault, SuperPerms, OPs
 #   DEFAULT: SuperPerms
 permission: SuperPerms
 
@@ -111,3 +114,47 @@ logFile: "plugins/MCBans/actions.log"
 #   Set to true for maximum security (may cause false kicks during API outages).
 #   DEFAULT: false
 failsafe: false
+
+#########################################################
+# Kick Messages
+#   Templates shown to banned players when they try to join.
+#   Placeholders: {reason}, {admin}, {expires}, {appeal_url}
+#   Use & colour codes (e.g. &c for red, &f for white, \n for new line).
+##
+
+kick-message:
+  # Shown for permanent global bans.
+  global: "&cYou are &lbanned&r&c from this server.\n&fReason: &7{reason}\n&fBanned by: &7{admin}"
+  # Shown for local (server-only) bans.
+  local: "&cYou are &llocally banned&r&c from this server.\n&fReason: &7{reason}\n&fBanned by: &7{admin}"
+  # Shown for temporary bans.
+  temp: "&cYou are &ltemporarily banned&r&c from this server.\n&fReason: &7{reason}\n&fBanned by: &7{admin}\n&fExpires: &7{expires}"
+  # Shown when failsafe=true and the API is unreachable.
+  failsafe: "&c[PvPIndex MCBans] &rUnable to verify your ban status. Please try again shortly."
+  # If set, appended to every kick message as "&fAppeal at: &b<url>"
+  appeal-url: ""
+
+#########################################################
+# Reason Presets
+#   Expand #key in ban commands to a full reason string.
+#   Usage: /ban <player> #hacks
+#          /gban <player> #hacks
+#          /tban <player> #chat-abuse   (uses default-duration if set)
+#          /tban <player> 7d #hacks     (duration overrides preset default)
+#
+#   Simple form:  key: "Reason text"
+#   Extended form with default temp-ban duration:
+#     key:
+#       reason: "Reason text"
+#       default-duration: "7d"   # supports s/m/h/d/w suffixes
+##
+
+reason-presets:
+  hacks: "Hacking - unfair advantage detected"
+  grief: "Griefing server property"
+  chat-abuse:
+    reason: "Chat abuse / spam"
+    default-duration: "1d"
+  hack-first:
+    reason: "Hacking - first offence"
+    default-duration: "7d"

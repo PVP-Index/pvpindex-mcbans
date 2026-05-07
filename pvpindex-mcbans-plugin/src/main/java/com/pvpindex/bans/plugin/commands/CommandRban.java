@@ -58,7 +58,7 @@ public class CommandRban extends BaseCommand{
             case LOCAL:
                 reason = config.getDefaultLocal();
                 if (args.size() > 0){
-                    reason = Util.join(args, " ");
+                    reason = config.resolveReason(Util.join(args, " "));
                 }
                 banControl = new Ban(plugin, type.getActionName(), target, targetUUID, targetIP, senderName, senderUUID, reason, "", "", null, true);
                 break;
@@ -68,7 +68,7 @@ public class CommandRban extends BaseCommand{
                     Util.message(sender, ChatColor.RED + localize("formatError"));
                     return;
                 }
-                reason = Util.join(args, " ");
+                reason = config.resolveReason(Util.join(args, " "));
                 banControl = new Ban(plugin, type.getActionName(), target, targetUUID, targetIP, senderName, senderUUID, reason, "", "", null, true);
                 break;
 
@@ -93,7 +93,7 @@ public class CommandRban extends BaseCommand{
                 }
                 reason = config.getDefaultTemp();
                 if (args.size() > 0){
-                    reason = Util.join(args, " ");
+                    reason = config.resolveReason(Util.join(args, " "));
                 }
                 banControl = new Ban(plugin, type.getActionName(), target, targetUUID, targetIP, senderName, senderUUID, reason, duration, measure, null, true);
                 break;

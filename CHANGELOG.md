@@ -12,9 +12,13 @@ Release tags use the `v` prefix (e.g. `v1.0.0`).
 ## [Unreleased]
 
 ### Added
-### Changed
-### Fixed
-### Removed
+- **Customizable kick messages** - `kick-message` section in `config.yml` with per-type templates (`global`, `local`, `temp`, `failsafe`). Supports `{reason}`, `{admin}`, `{expires}`, and `{appeal_url}` placeholders plus an optional `appeal-url` appended automatically.
+- **Reason presets** - `reason-presets` section in `config.yml`. Use `#key` in any ban command to expand to a full reason string (`/ban <player> #hacks`). Extended form supports a `default-duration` for use with `/tban <player> #preset`. Tab-completion suggests preset keys.
+- **Preset startup validation** - invalid or misconfigured presets (missing reason field, bad duration format) are logged as warnings on load/reload.
+- **Case-insensitive preset keys** - `#Hacks`, `#HACKS`, and `#hacks` all resolve to the same preset.
+- **Improved tab-completion for ban commands** - preset `#key` suggestions appear at the reason position even on empty input (no need to type `#` first); sorted alphabetically; filtered case-insensitively.
+- **`/mcbans presets` command** - lists all configured presets with their reason text and default duration at a glance. Requires `mcbans.ban.local`.
+- Config bumped to `ConfigVersion: 3`; upgrading servers get their old config backed up automatically.
 
 ---
 
