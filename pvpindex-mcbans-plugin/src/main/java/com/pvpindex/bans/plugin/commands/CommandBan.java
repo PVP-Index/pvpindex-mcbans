@@ -52,10 +52,12 @@ public class CommandBan extends BaseCommand{
     }
 
     /** Returns all preset keys matching {@code partial} as "#key" suggestions.
-     *  Shows all presets on empty input; filters case-insensitively on "#prefix". */
+     *  Shows all presets on empty input; filters case-insensitively on "#prefix".
+     *  Returns an empty list (not null) when the user is typing a custom reason so
+     *  Paper does not fall back to suggesting online player names. */
     static List<String> presetsCompletion(MCBans plugin, String partial) {
         if (!partial.isEmpty() && !partial.startsWith("#")) {
-            return null; // user is typing a custom reason, don't interfere
+            return List.of(); // custom reason: suppress player-name fallback
         }
         String lprefix = partial.startsWith("#")
                 ? partial.substring(1).toLowerCase(Locale.ROOT) : "";

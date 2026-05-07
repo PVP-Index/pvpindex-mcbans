@@ -78,25 +78,29 @@ public class PlayerListener implements Listener {
         if (apiResult.isPresent()) {
             BanStatusResponse status = apiResult.get();
             if (status.banned() && status.ban() != null) {
+                // API confirmed ban, cache it and deny.
                 plugin.getBanDao().upsertBan(BanDao.fromApiRecord(status.ban()));
                 denyLogin(event, status.ban().type(), status.ban().reason(),
                         status.ban().adminName(), status.ban().expiresAt());
+                return;
             }
-        } else {
-            // API unavailable - fall back to local storage cache
-            StorageBackend store = plugin.getBanDao();
-            Optional<LocalBan> localBan = store.findActiveBan(uuid);
-            if (localBan.isPresent()) {
-                LocalBan ban = localBan.get();
-                denyLogin(event, ban.type(), ban.reason(), ban.adminName(), null);
-            } else if (config.isFailsafe()) {
-                // Issue #118: failsafe=true - deny login when API is unreachable
-                // and there is no cached ban record, to prevent unverified access.
-                event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
-                        Util.color(config.getKickFailsafeMessage()));
-                log.warning("Denied login for " + event.getName()
-                        + " (failsafe=true, API unreachable)");
-            }
+            // API says not banned, still check local storage (catches local bans
+            // that were placed before/without API sync, or while API was down).
+        }
+
+        // API unavailable OR API said not-banned: check local storage.
+        StorageBackend store = plugin.getBanDao();
+        Optional<LocalBan> localBan = store.findActiveBan(uuid);
+        if (localBan.isPresent()) {
+            LocalBan ban = localBan.get();
+            denyLogin(event, ban.type(), ban.reason(), ban.adminName(), null);
+        } else if (!apiResult.isPresent() && config.isFailsafe()) {
+            // Issue #118: failsafe=true - deny login only when API was unreachable
+            // and there is no cached ban record, to prevent unverified access.
+            event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
+                    Util.color(config.getKickFailsafeMessage()));
+            log.warning("Denied login for " + event.getName()
+                    + " (failsafe=true, API unreachable)");
         }
     }
 

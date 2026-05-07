@@ -21,13 +21,17 @@ import com.pvpindex.bans.plugin.events.PlayerUnbanEvent;
 import com.pvpindex.bans.plugin.events.PlayerUnbannedEvent;
 import com.pvpindex.bans.plugin.util.Util;
 import com.pvpindex.bans.utils.TimeTools;
+import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.profile.PlayerProfile;
 
 import java.time.Instant;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static com.pvpindex.bans.plugin.I18n.localize;
 
@@ -139,6 +143,7 @@ public class Ban {
             // Always write locally first (offline safety)
             plugin.getBanDao().insertOfflineBan(uuid, playerName, "global", reason,
                     normaliseUUID(senderUUID), senderName, null);
+            addPaperBan(uuid, playerName, reason, senderName, null);
 
             // Try pushing to API (only when a key is configured)
             if (plugin.getConfigs().isValidApiKey()) {
@@ -171,6 +176,7 @@ public class Ban {
             String uuid = normaliseUUID(playerUUID);
             plugin.getBanDao().insertOfflineBan(uuid, playerName, "local", reason,
                     normaliseUUID(senderUUID), senderName, null);
+            addPaperBan(uuid, playerName, reason, senderName, null);
 
             if (plugin.getConfigs().isValidApiKey()) {
                 boolean apiOk = plugin.getApiClient()
@@ -206,6 +212,7 @@ public class Ban {
 
             plugin.getBanDao().insertOfflineBan(uuid, playerName, "temp", reason,
                     normaliseUUID(senderUUID), senderName, expiresEpoch);
+            addPaperBan(uuid, playerName, reason, senderName, expiresEpoch);
 
             boolean apiOk = plugin.getConfigs().isValidApiKey() && plugin.getApiClient()
                     .ban(new BanRequest(uuid, playerName, "temp", reason,
@@ -243,6 +250,7 @@ public class Ban {
         new Thread(() -> {
             String uuid = normaliseUUID(playerUUID);
             plugin.getBanDao().deactivateBan(uuid);
+            removePaperBan(uuid, playerName);
 
             if (plugin.getConfigs().isValidApiKey()) {
                 boolean apiOk = plugin.getApiClient().unban(uuid);
@@ -287,5 +295,48 @@ public class Ban {
 
     private static String normaliseUUID(String uuid) {
         return uuid == null ? null : uuid.toLowerCase().replace("-", "");
+    }
+
+    /** Converts a no-dash lowercase UUID string to {@link java.util.UUID}, or null if invalid. */
+    private static UUID toJavaUUID(String nodash) {
+        if (nodash == null || nodash.length() != 32) {
+            return null;
+        }
+        try {
+            return UUID.fromString(
+                nodash.substring(0, 8) + "-" +
+                nodash.substring(8, 12) + "-" +
+                nodash.substring(12, 16) + "-" +
+                nodash.substring(16, 20) + "-" +
+                nodash.substring(20));
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    /** Adds a ban to Paper's native banned-players.json (BanList.Type.PROFILE). */
+    @SuppressWarnings("unchecked")
+    private static void addPaperBan(String uuid, String name, String reason,
+                                    String source, Long expiresEpoch) {
+        UUID javaUuid = toJavaUUID(uuid);
+        if (javaUuid == null) {
+            return;
+        }
+        PlayerProfile profile = Bukkit.createPlayerProfile(javaUuid, name);
+        Date expires = expiresEpoch == null ? null : new Date(expiresEpoch * 1000L);
+        BanList<PlayerProfile> banList = Bukkit.getBanList(BanList.Type.PROFILE);
+        banList.addBan(profile, reason, expires, source);
+    }
+
+    /** Removes a ban from Paper's native banned-players.json. */
+    @SuppressWarnings("unchecked")
+    private static void removePaperBan(String uuid, String name) {
+        UUID javaUuid = toJavaUUID(uuid);
+        if (javaUuid == null) {
+            return;
+        }
+        PlayerProfile profile = Bukkit.createPlayerProfile(javaUuid, name);
+        BanList<PlayerProfile> banList = Bukkit.getBanList(BanList.Type.PROFILE);
+        banList.pardon(profile);
     }
 }
