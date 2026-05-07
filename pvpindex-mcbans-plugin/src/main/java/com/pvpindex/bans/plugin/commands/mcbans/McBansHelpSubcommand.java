@@ -65,6 +65,7 @@ public class McBansHelpSubcommand extends McBansSubcommand {
         send("&f/mcbans ping" + ChatColor.BLUE + " Check overall response time from API");
         send("&f/mcbans sync" + ChatColor.BLUE + " Force a sync to occur with MCBans API");
         send("&f/mcbans reload" + ChatColor.BLUE + " Reload settings and language files");
+        send("&f/mcbans presets" + ChatColor.BLUE + " List all configured ban reason presets");
     }
 
     private void banningHelp() {

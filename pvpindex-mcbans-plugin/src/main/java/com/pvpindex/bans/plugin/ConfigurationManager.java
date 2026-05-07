@@ -11,6 +11,10 @@ package com.pvpindex.bans.plugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
 import java.util.logging.Level;
 
 import org.bukkit.configuration.file.FileConfiguration;
@@ -21,7 +25,7 @@ import com.pvpindex.bans.plugin.util.Util;
 
 public class ConfigurationManager {
     /* Current config.yml File Version! */
-    private final int latestVersion = 2;
+    private final int latestVersion = 3;
 
     private final MCBans plugin;
     private final ActionLog log;
@@ -60,15 +64,16 @@ public class ConfigurationManager {
         conf = plugin.getConfig();
 
         checkver(conf.getInt("ConfigVersion", 1));
+        validatePresets();
 
         // check API key
         if (conf.getString("pvpindex.apiKey", "").trim().isEmpty()){
             isValidKey = false;
             if (initialLoad){
-                log.warning("No API key configured — ban sync is disabled.");
+                log.warning("No API key configured - ban sync is disabled.");
                 log.warning("Set pvpindex.apiKey in config.yml. Get a key at: https://pvpindex.com/apply");
             }else{
-                log.warning("API key missing or invalid — please check config.yml.");
+                log.warning("API key missing or invalid - please check config.yml.");
             }
         }else{
             isValidKey = true;
@@ -281,5 +286,101 @@ public class ConfigurationManager {
     }
     public boolean isFailsafe(){
         return conf.getBoolean("failsafe", false);
+    }
+
+    // ─── Kick message templates ──────────────────────────────────────────────
+
+    /**
+     * Returns the kick message template for the given ban type.
+     * {@code type} should be one of {@code "global"}, {@code "local"}, or {@code "temp"}.
+     * Supports placeholders: {@code {reason}}, {@code {admin}}, {@code {expires}},
+     * {@code {appeal_url}}.
+     */
+    public String getKickMessage(String type) {
+        String template = conf.getString("kick-message." + type, null);
+        if (template != null) {
+            return template;
+        }
+        return switch (type) {
+            case "temp"  -> "&cYou are &ltemporarily banned&r&c from this server.\n&fReason: &7{reason}\n&fBanned by: &7{admin}\n&fExpires: &7{expires}";
+            case "local" -> "&cYou are &llocally banned&r&c from this server.\n&fReason: &7{reason}\n&fBanned by: &7{admin}";
+            default      -> "&cYou are &lbanned&r&c from this server.\n&fReason: &7{reason}\n&fBanned by: &7{admin}";
+        };
+    }
+
+    /** Returns the failsafe kick message (shown when API is unreachable and failsafe=true). */
+    public String getKickFailsafeMessage() {
+        return conf.getString("kick-message.failsafe",
+                "&c[PvPIndex MCBans] &rUnable to verify your ban status. Please try again shortly.");
+    }
+
+    /** Returns the appeal URL appended to kick messages, or an empty string if not configured. */
+    public String getKickAppealUrl() {
+        return conf.getString("kick-message.appeal-url", "").trim();
+    }
+
+    // ─── Reason presets ─────────────────────────────────────────────────────
+
+    /**
+     * Resolves a raw reason string.  If {@code raw} starts with {@code #}, the
+     * remainder is looked up as a preset key and the configured reason text is
+     * returned.  If the key is unknown the original {@code raw} value is
+     * returned unchanged so commands degrade gracefully.
+     */
+    public String resolveReason(String raw) {
+        if (raw == null || !raw.startsWith("#")) {
+            return raw;
+        }
+        String key = raw.substring(1).toLowerCase(Locale.ROOT);
+        if (conf.isConfigurationSection("reason-presets." + key)) {
+            String preset = conf.getString("reason-presets." + key + ".reason", null);
+            return preset != null ? preset : raw;
+        }
+        String preset = conf.getString("reason-presets." + key, null);
+        return preset != null ? preset : raw;
+    }
+
+    /**
+     * Returns the {@code default-duration} value for a reason preset (e.g.
+     * {@code "7d"}), or {@code null} if the preset does not define one.
+     */
+    public String getPresetDefaultDuration(String key) {
+        String normKey = key.toLowerCase(Locale.ROOT);
+        if (!conf.isConfigurationSection("reason-presets." + normKey)) {
+            return null;
+        }
+        return conf.getString("reason-presets." + normKey + ".default-duration", null);
+    }
+
+    /**
+     * Returns all defined reason-preset keys for tab completion.
+     */
+    public List<String> getReasonPresetKeys() {
+        if (!conf.isConfigurationSection("reason-presets")) {
+            return Collections.emptyList();
+        }
+        return new ArrayList<>(conf.getConfigurationSection("reason-presets").getKeys(false));
+    }
+
+    // ─── Preset validation ───────────────────────────────────────────────────
+
+    private void validatePresets() {
+        List<String> keys = getReasonPresetKeys();
+        if (keys.isEmpty()) {
+            return;
+        }
+        for (String key : keys) {
+            String resolved = resolveReason("#" + key);
+            if (resolved.equals("#" + key)) {
+                log.warning("Reason preset '" + key + "' has no 'reason' field - it will be ignored.");
+            }
+            String dur = getPresetDefaultDuration(key);
+            if (dur != null && !dur.matches("\\d+(s|m|h|d|w)")) {
+                log.warning("Reason preset '" + key
+                        + "' has an invalid default-duration '" + dur
+                        + "' (expected format e.g. 7d, 30m, 2h).");
+            }
+        }
+        log.info("Loaded " + keys.size() + " reason preset(s): " + String.join(", ", keys));
     }
 }

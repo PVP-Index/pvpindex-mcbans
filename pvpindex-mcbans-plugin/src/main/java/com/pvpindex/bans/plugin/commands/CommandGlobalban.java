@@ -33,13 +33,12 @@ public class CommandGlobalban extends BaseCommand{
     public void execute() {
         args.remove(0); // remove target
 
-        if(args.size()<0){
+        if(args.size() < 1){
             Util.message(sender, "A reason is required for a global ban.");
             return;
         }
-        // build reason
-        String reason = Util.join(args, " ");
-        
+        String reason = config.resolveReason(Util.join(args, " "));
+
         // Start
         Ban banControl = new Ban(plugin, BanType.GLOBAL.getActionName(), target, targetUUID, targetIP, senderName, senderUUID, reason, "", "", null, false);
         banControl.run();
@@ -47,8 +46,14 @@ public class CommandGlobalban extends BaseCommand{
 
     @Override
     protected List<String> tabComplete(MCBans plugin, CommandSender sender, String cmd, String[] preArgs) {
-        if(preArgs.length==1){
-            return plugin.getServer().getOnlinePlayers().stream().filter(player->player.getName().startsWith(preArgs[0])).map(player->player.getName()).collect(Collectors.toList());
+        if (preArgs.length == 1) {
+            return plugin.getServer().getOnlinePlayers().stream()
+                    .filter(player -> player.getName().startsWith(preArgs[0]))
+                    .map(player -> player.getName())
+                    .collect(Collectors.toList());
+        }
+        if (preArgs.length >= 2) {
+            return CommandBan.presetsCompletion(plugin, preArgs[preArgs.length - 1]);
         }
         return null;
     }

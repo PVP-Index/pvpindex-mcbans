@@ -9,12 +9,13 @@
  */
 package com.pvpindex.bans.plugin.commands;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
+import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import com.pvpindex.bans.plugin.BanType;
+import com.pvpindex.bans.plugin.MCBans;
 import com.pvpindex.bans.plugin.exception.CommandException;
 import com.pvpindex.bans.plugin.request.Ban;
 import com.pvpindex.bans.plugin.util.Util;
@@ -34,17 +35,35 @@ public class CommandBan extends BaseCommand{
     public void execute() throws CommandException {
         args.remove(0); //remove target
 
-        // check BanType
-        BanType type = BanType.LOCAL;
-
-        String reason = null;
-        Ban banControl = null;
-        reason = config.getDefaultLocal();
+        String reason = config.getDefaultLocal();
         if (args.size() > 0){
-            reason = Util.join(args, " ");
+            reason = config.resolveReason(Util.join(args, " "));
         }
-        banControl = new Ban(plugin, type.getActionName(), target, targetUUID, targetIP, senderName, senderUUID, reason, "", "", null, false);
+        Ban banControl = new Ban(plugin, BanType.LOCAL.getActionName(), target, targetUUID, targetIP, senderName, senderUUID, reason, "", "", null, false);
         banControl.run();
+    }
+
+    @Override
+    protected List<String> tabComplete(MCBans plugin, CommandSender sender, String cmd, String[] preArgs) {
+        if (preArgs.length >= 2) {
+            return presetsCompletion(plugin, preArgs[preArgs.length - 1]);
+        }
+        return null;
+    }
+
+    /** Returns all preset keys matching {@code partial} as "#key" suggestions.
+     *  Shows all presets on empty input; filters case-insensitively on "#prefix". */
+    static List<String> presetsCompletion(MCBans plugin, String partial) {
+        if (!partial.isEmpty() && !partial.startsWith("#")) {
+            return null; // user is typing a custom reason, don't interfere
+        }
+        String lprefix = partial.startsWith("#")
+                ? partial.substring(1).toLowerCase(Locale.ROOT) : "";
+        return plugin.getConfigs().getReasonPresetKeys().stream()
+                .filter(k -> k.toLowerCase(Locale.ROOT).startsWith(lprefix))
+                .sorted()
+                .map(k -> "#" + k)
+                .collect(Collectors.toList());
     }
 
     @Override

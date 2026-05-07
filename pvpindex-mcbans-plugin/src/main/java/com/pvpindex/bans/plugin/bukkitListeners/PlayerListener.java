@@ -13,10 +13,10 @@ import com.pvpindex.bans.api.BanStatusResponse;
 import com.pvpindex.bans.plugin.ActionLog;
 import com.pvpindex.bans.plugin.ConfigurationManager;
 import com.pvpindex.bans.plugin.MCBans;
+import com.pvpindex.bans.plugin.util.Util;
 import com.pvpindex.bans.storage.BanDao;
 import com.pvpindex.bans.storage.StorageBackend;
 import com.pvpindex.bans.storage.LocalBan;
-import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -83,18 +83,17 @@ public class PlayerListener implements Listener {
                         status.ban().adminName(), status.ban().expiresAt());
             }
         } else {
-            // API unavailable — fall back to local storage cache
+            // API unavailable - fall back to local storage cache
             StorageBackend store = plugin.getBanDao();
             Optional<LocalBan> localBan = store.findActiveBan(uuid);
             if (localBan.isPresent()) {
                 LocalBan ban = localBan.get();
                 denyLogin(event, ban.type(), ban.reason(), ban.adminName(), null);
             } else if (config.isFailsafe()) {
-                // Issue #118: failsafe=true — deny login when API is unreachable
+                // Issue #118: failsafe=true - deny login when API is unreachable
                 // and there is no cached ban record, to prevent unverified access.
                 event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_OTHER,
-                        "[PvPIndex MCBans] Server is currently unable to verify your ban status. "
-                                + "Please try again shortly.");
+                        Util.color(config.getKickFailsafeMessage()));
                 log.warning("Denied login for " + event.getName()
                         + " (failsafe=true, API unreachable)");
             }
@@ -103,15 +102,22 @@ public class PlayerListener implements Listener {
 
     private void denyLogin(AsyncPlayerPreLoginEvent event, String type, String reason,
                            String adminName, String expiresAt) {
-        String banType = type != null ? type : "local";
-        String admin   = adminName != null ? adminName : "Server";
-        String expiry  = expiresAt != null ? " (until " + expiresAt + ")" : "";
-        String message = ChatColor.RED + "[PvPIndex MCBans] You are "
-                + (banType.equals("temp") ? "temporarily " : "")
-                + "banned from this server.\n"
-                + ChatColor.WHITE + "Reason: " + reason + "\n"
-                + ChatColor.GRAY  + "Banned by: " + admin + expiry;
-        event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, message);
+        String banType  = type != null ? type : "local";
+        String admin    = adminName != null ? adminName : "Server";
+        String expiry   = expiresAt != null ? expiresAt : "permanent";
+        String appealUrl = config.getKickAppealUrl();
+
+        String message = config.getKickMessage(banType)
+                .replace("{reason}",     reason != null ? reason : "")
+                .replace("{admin}",      admin)
+                .replace("{expires}",    expiry)
+                .replace("{appeal_url}", appealUrl);
+
+        if (!appealUrl.isEmpty()) {
+            message += "\n&fAppeal at: &b" + appealUrl;
+        }
+
+        event.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, Util.color(message));
         log.info("Denied login for " + event.getName()
                 + " (type=" + banType + ", reason=" + reason + ")");
     }
