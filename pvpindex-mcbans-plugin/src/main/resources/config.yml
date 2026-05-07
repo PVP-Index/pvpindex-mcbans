@@ -31,6 +31,31 @@ pvpindex:
   #   DEFAULT: 60
   syncInterval: 60
 
+  # kicks.public: Whether kicks are reported to the PvPIndex API and shown
+  #   publicly on bans.pvpindex.com.
+  #   Set to true to make kicks visible in the public kick registry.
+  #   DEFAULT: false
+  kicks:
+    public: false
+
+  # legacy: Settings for importing bans from legacy sources (mcbans.com).
+  #   Legacy bans are marked with is_legacy=true and stored locally.
+  legacy:
+    # enabled: Whether to check mcbans.com for legacy ban data.
+    #   Only active when an API key is configured (storage.sync.enabled=true).
+    #   DEFAULT: true
+    enabled: true
+
+    # check-on-join: Query mcbans.com on every player join to import their ban record.
+    #   Results are cached locally so subsequent joins skip the network call.
+    #   DEFAULT: true
+    check-on-join: true
+
+    # include-in-bans: Whether a mcbans.com ban prevents a player from joining.
+    #   Set to false to import legacy bans for informational purposes only.
+    #   DEFAULT: true
+    include-in-bans: true
+
 #########################################################
 # Local Storage
 #   Controls how bans are stored locally on the server.

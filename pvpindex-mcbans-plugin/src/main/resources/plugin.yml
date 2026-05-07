@@ -107,3 +107,6 @@ permissions:
   mcbans.announce:
     description: Receive ban/kick broadcast announcements
     default: op
+  mcbans.vpn.bypass:
+    description: Bypass the AntVPN check on join
+    default: op

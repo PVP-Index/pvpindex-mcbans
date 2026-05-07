@@ -12,6 +12,7 @@ package com.pvpindex.bans.plugin;
 import com.pvpindex.bans.api.PvPIndexApiClient;
 import com.pvpindex.bans.plugin.callBacks.BanSync;
 import com.pvpindex.bans.plugin.commands.MCBansCommandHandler;
+import com.pvpindex.bans.plugin.vpn.VpnManager;
 import com.pvpindex.bans.storage.StorageBackend;
 import com.pvpindex.bans.storage.StorageManager;
 
@@ -34,6 +35,7 @@ public final class Registry {
     private static PvPIndexApiClient apiClient;
     private static MCBansCommandHandler commandHandler;
     private static BanSync bansync;
+    private static VpnManager vpnManager;
 
     /** Legacy flag: broadcast ban announcements to all online players. */
     public static boolean announceAll = false;
@@ -42,7 +44,7 @@ public final class Registry {
     }
 
     // -------------------------------------------------------------------------
-    // Package-private mutators — called only from Bootstrap
+    // Package-private mutators - called only from Bootstrap
     // -------------------------------------------------------------------------
 
     static void init(
@@ -54,7 +56,8 @@ public final class Registry {
             StorageBackend s,
             PvPIndexApiClient a,
             MCBansCommandHandler ch,
-            BanSync bs) {
+            BanSync bs,
+            VpnManager vm) {
         plugin = p;
         config = c;
         log = l;
@@ -64,6 +67,7 @@ public final class Registry {
         apiClient = a;
         commandHandler = ch;
         bansync = bs;
+        vpnManager = vm;
     }
 
     static void setApiClient(PvPIndexApiClient a) {
@@ -92,6 +96,7 @@ public final class Registry {
         apiClient = null;
         commandHandler = null;
         bansync = null;
+        vpnManager = null;
         announceAll = false;
     }
 
@@ -133,5 +138,9 @@ public final class Registry {
 
     public static BanSync getBanSync() {
         return bansync;
+    }
+
+    public static VpnManager getVpnManager() {
+        return vpnManager;
     }
 }

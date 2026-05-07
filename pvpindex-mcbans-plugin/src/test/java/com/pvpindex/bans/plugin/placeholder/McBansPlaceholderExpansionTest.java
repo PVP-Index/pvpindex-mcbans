@@ -39,7 +39,7 @@ class McBansPlaceholderExpansionTest {
     private static final long NOW = System.currentTimeMillis() / 1000L;
 
     // -------------------------------------------------------------------------
-    // Stub storage backend — returns a fixed ban or empty
+    // Stub storage backend - returns a fixed ban or empty
     // -------------------------------------------------------------------------
 
     /**
@@ -99,7 +99,7 @@ class McBansPlaceholderExpansionTest {
         return new LocalBan(
                 "abc123", "TestPlayer", type, reason,
                 "adminuuid", adminName,
-                null, true, true, NOW - 100, NOW - 100
+                null, true, true, false, NOW - 100, NOW - 100
         );
     }
 
@@ -262,7 +262,7 @@ class McBansPlaceholderExpansionTest {
         void ban_admin_handles_null_admin_name() {
             LocalBan banWithNullAdmin = new LocalBan(
                     "abc123", "TestPlayer", "local", "reason",
-                    null, null, null, true, true, NOW, NOW);
+                    null, null, null, true, true, false, NOW, NOW);
             McBansPlaceholderExpansion exp = new McBansPlaceholderExpansion(storageWith(banWithNullAdmin));
             PlayerMock player = new PlayerMock(MockBukkit.getMock(), "Alice", UUID.randomUUID());
             assertEquals("", exp.onRequest(player, "ban_admin"));

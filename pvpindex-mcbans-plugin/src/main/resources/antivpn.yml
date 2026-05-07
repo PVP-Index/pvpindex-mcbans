@@ -1,0 +1,54 @@
+##########################################################
+# PvPIndex MCBans - Anti-VPN Configuration
+# Uses the AntVPN realtime WebSocket API (https://antivpn.io)
+##
+
+antivpn:
+  # enabled: Whether to enable the AntVPN integration.
+  #   Requires a valid api-token to function.
+  #   DEFAULT: false
+  enabled: false
+
+  # api-token: Your AntVPN JWT token.
+  #   Obtain one at https://antivpn.io/dashboard
+  api-token: ""
+
+  # action: What to do when a VPN or proxy is detected.
+  #   WARN  - Log to console + notify admins; player is still allowed to join.
+  #   KICK  - Disconnect the player (recommended default).
+  #   BAN   - Ban the player locally and disconnect them.
+  #   DEFAULT: KICK
+  action: KICK
+
+  # ban-duration-seconds: Duration for VPN bans when action=BAN.
+  #   0 means a permanent ban.
+  #   DEFAULT: 0
+  ban-duration-seconds: 0
+
+  # sync-bans: Whether VPN bans (action=BAN) are synced to the PvPIndex API.
+  #   DEFAULT: false
+  sync-bans: false
+
+  # kick-message: Message shown to players kicked for VPN usage.
+  #   Supports & colour codes. Use \n for a new line.
+  #   DEFAULT: see below
+  kick-message: "&c[PvPIndex MCBans] &rVPN or proxy usage is not allowed on this server."
+
+  # ban-reason: Reason stored in the local ban record for VPN bans.
+  #   DEFAULT: "VPN or proxy usage detected"
+  ban-reason: "VPN or proxy usage detected"
+
+  # timeout-ms: Milliseconds to wait for an AntVPN verification response.
+  #   If the check times out, the player is allowed to join (fail-open).
+  #   DEFAULT: 3000
+  timeout-ms: 3000
+
+  # bypass-permission: Whether players with the mcbans.vpn.bypass permission
+  #   skip the VPN check entirely.
+  #   DEFAULT: true
+  bypass-permission: true
+
+  # skip-on-attack: When AntVPN reports an active attack (shield mode), skip
+  #   the VPN check to avoid accidentally blocking legitimate players.
+  #   DEFAULT: false
+  skip-on-attack: false

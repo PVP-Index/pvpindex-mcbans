@@ -13,7 +13,11 @@ import com.pvpindex.bans.api.BanStatusResponse;
 import com.pvpindex.bans.plugin.ActionLog;
 import com.pvpindex.bans.plugin.ConfigurationManager;
 import com.pvpindex.bans.plugin.MCBans;
+import com.pvpindex.bans.plugin.Registry;
+import com.pvpindex.bans.plugin.legacy.LegacyBanImporter;
 import com.pvpindex.bans.plugin.util.Util;
+import com.pvpindex.bans.plugin.vpn.VpnCheckResult;
+import com.pvpindex.bans.plugin.vpn.VpnManager;
 import com.pvpindex.bans.storage.BanDao;
 import com.pvpindex.bans.storage.StorageBackend;
 import com.pvpindex.bans.storage.LocalBan;
@@ -93,7 +97,11 @@ public class PlayerListener implements Listener {
         Optional<LocalBan> localBan = store.findActiveBan(uuid);
         if (localBan.isPresent()) {
             LocalBan ban = localBan.get();
-            denyLogin(event, ban.type(), ban.reason(), ban.adminName(), null);
+            // Skip legacy bans if include-in-bans is disabled
+            if (!ban.isLegacy() || config.isLegacyIncludeInBans()) {
+                denyLogin(event, ban.type(), ban.reason(), ban.adminName(), null);
+                return;
+            }
         } else if (!apiResult.isPresent() && config.isFailsafe()) {
             // Issue #118: failsafe=true - deny login only when API was unreachable
             // and there is no cached ban record, to prevent unverified access.
@@ -101,6 +109,43 @@ public class PlayerListener implements Listener {
                     Util.color(config.getKickFailsafeMessage()));
             log.warning("Denied login for " + event.getName()
                     + " (failsafe=true, API unreachable)");
+            return;
+        }
+
+        // Legacy ban check (mcbans.com): only when no local ban record exists yet
+        if (!localBan.isPresent() && config.isLegacyEnabled() && config.isLegacyCheckOnJoin()) {
+            LegacyBanImporter legacyImporter = new LegacyBanImporter(plugin.getBanDao(), plugin.getLogger());
+            try {
+                Optional<String> legacyReason = CompletableFuture
+                        .supplyAsync(() -> legacyImporter.checkAndImport(uuid, event.getName()), executor)
+                        .get(API_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+
+                if (legacyReason.isPresent() && config.isLegacyIncludeInBans()) {
+                    denyLogin(event, "local", legacyReason.get(), "mcbans.com", null);
+                    return;
+                }
+            } catch (TimeoutException e) {
+                log.fine("Legacy ban check timed out for " + event.getName());
+            } catch (InterruptedException | ExecutionException e) {
+                log.fine("Legacy ban check error for " + event.getName() + ": " + e.getMessage());
+            }
+        }
+
+        // VPN check: only when player passed all ban checks
+        VpnManager vpnManager = Registry.getVpnManager();
+        if (vpnManager != null && vpnManager.isEnabled()) {
+            try {
+                long timeoutMs = vpnManager.getConfiguration().getTimeoutMs();
+                VpnCheckResult vpnResult = vpnManager.checkPlayer(event)
+                        .get(timeoutMs, TimeUnit.MILLISECONDS);
+                if (!vpnResult.allowed()) {
+                    vpnManager.handleDetection(event, vpnResult);
+                }
+            } catch (TimeoutException e) {
+                log.warning("VPN check timed out for " + event.getName() + " - allowing join.");
+            } catch (InterruptedException | ExecutionException e) {
+                log.warning("VPN check error for " + event.getName() + ": " + e.getMessage());
+            }
         }
     }
 

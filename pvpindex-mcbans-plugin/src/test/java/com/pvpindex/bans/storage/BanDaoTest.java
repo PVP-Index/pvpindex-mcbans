@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * Unit tests for {@link BanDao} using an in-memory SQLite database.
  *
- * <p>No Bukkit or MockBukkit required — pure Java 21 + sqlite-jdbc.</p>
+ * <p>No Bukkit or MockBukkit required - pure Java 21 + sqlite-jdbc.</p>
  */
 class BanDaoTest {
 
@@ -55,6 +55,7 @@ class BanDaoTest {
                   expires_at  INTEGER,
                   is_active   INTEGER NOT NULL DEFAULT 1,
                   is_synced   INTEGER NOT NULL DEFAULT 0,
+                  is_legacy   INTEGER NOT NULL DEFAULT 0,
                   created_at  INTEGER NOT NULL,
                   updated_at  INTEGER NOT NULL
                 )
@@ -194,7 +195,7 @@ class BanDaoTest {
     void upsertBan_insertsNewRow() {
         long now = Instant.now().getEpochSecond();
         LocalBan ban = new LocalBan(UUID_ALICE, "Alice", "local", "Grief",
-                null, null, null, true, true, now, now);
+                null, null, null, true, true, false, now, now);
         dao.upsertBan(ban);
 
         Optional<LocalBan> found = dao.findActiveBan(UUID_ALICE);
@@ -206,12 +207,12 @@ class BanDaoTest {
     void upsertBan_updatesExistingRowWhenNewer() {
         long earlier = Instant.now().getEpochSecond() - 60;
         LocalBan old = new LocalBan(UUID_ALICE, "Alice", "local", "Old reason",
-                null, null, null, true, true, earlier, earlier);
+                null, null, null, true, true, false, earlier, earlier);
         dao.upsertBan(old);
 
         long later = Instant.now().getEpochSecond();
         LocalBan updated = new LocalBan(UUID_ALICE, "Alice", "global", "New reason",
-                null, null, null, true, true, earlier, later);
+                null, null, null, true, true, false, earlier, later);
         dao.upsertBan(updated);
 
         Optional<LocalBan> found = dao.findActiveBan(UUID_ALICE);
@@ -227,6 +228,6 @@ class BanDaoTest {
     private void insertBan(String uuid, String type, boolean isActive, Long expiresAt) {
         long now = Instant.now().getEpochSecond();
         dao.upsertBan(new LocalBan(uuid, "Player", type, "Test reason",
-                null, null, expiresAt, isActive, true, now, now));
+                null, null, expiresAt, isActive, true, false, now, now));
     }
 }

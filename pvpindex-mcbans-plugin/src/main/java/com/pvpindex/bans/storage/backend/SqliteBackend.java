@@ -74,10 +74,17 @@ public class SqliteBackend implements StorageBackend {
                   expires_at  INTEGER,
                   is_active   INTEGER NOT NULL DEFAULT 1,
                   is_synced   INTEGER NOT NULL DEFAULT 0,
+                  is_legacy   INTEGER NOT NULL DEFAULT 0,
                   created_at  INTEGER NOT NULL,
                   updated_at  INTEGER NOT NULL
                 )
                 """);
+            // Migration: add is_legacy column if upgrading from older schema
+            try {
+                st.execute("ALTER TABLE player_bans ADD COLUMN is_legacy INTEGER NOT NULL DEFAULT 0");
+            } catch (java.sql.SQLException ignored) {
+                // Column already exists - this is expected for fresh installs
+            }
             st.execute("""
                 CREATE INDEX IF NOT EXISTS idx_bans_active ON player_bans (uuid, is_active)
                 """);
@@ -113,6 +120,11 @@ public class SqliteBackend implements StorageBackend {
     public void insertOfflineBan(String uuid, String playerName, String type, String reason,
                                  String adminUuid, String adminName, Long expiresAt) {
         dao.insertOfflineBan(uuid, playerName, type, reason, adminUuid, adminName, expiresAt);
+    }
+
+    @Override
+    public void insertLegacyBan(String uuid, String playerName, String reason, String adminName) {
+        dao.insertLegacyBan(uuid, playerName, reason, adminName);
     }
 
     @Override
