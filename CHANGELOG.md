@@ -11,6 +11,10 @@ Release tags use the `v` prefix (e.g. `v1.0.0`).
 
 ## [Unreleased]
 
+---
+
+## [1.1.0] - 2026-05-07
+
 ### Added
 - **Customizable kick messages** - `kick-message` section in `config.yml` with per-type templates (`global`, `local`, `temp`, `failsafe`). Supports `{reason}`, `{admin}`, `{expires}`, and `{appeal_url}` placeholders plus an optional `appeal-url` appended automatically.
 - **Reason presets** - `reason-presets` section in `config.yml`. Use `#key` in any ban command to expand to a full reason string (`/ban <player> #hacks`). Extended form supports a `default-duration` for use with `/tban <player> #preset`. Tab-completion suggests preset keys.
