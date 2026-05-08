@@ -312,10 +312,10 @@ Client                                           Server
 
 | Code | Meaning | Followed by |
 |---|---|---|
-| `126` | Success / ACK | — |
+| `126` | Success / ACK | - |
 | `124` | Generic error | `String` error message |
 | `-126` | Bad API key | `String` detail message |
-| `-127` | Session close | — |
+| `-127` | Session close | - |
 
 ---
 

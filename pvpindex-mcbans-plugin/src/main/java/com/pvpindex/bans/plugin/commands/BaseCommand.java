@@ -131,7 +131,7 @@ public abstract class BaseCommand {
             		}
             	}
             }
-            // Offline UUID lookup — if we still don't have a UUID after name validation
+            // Offline UUID lookup - if we still don't have a UUID after name validation
             if (targetUUID == null && target != null) {
                 org.bukkit.OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(target);
                 if (offlinePlayer.hasPlayedBefore() || offlinePlayer.isOnline()) {

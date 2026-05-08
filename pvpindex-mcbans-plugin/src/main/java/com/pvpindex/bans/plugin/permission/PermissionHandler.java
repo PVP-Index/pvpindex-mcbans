@@ -38,7 +38,7 @@ public class PermissionHandler {
 
     // permission plugin
     private net.milkbowl.vault.permission.Permission vaultPermission = null; // not import package
-    // PermissionsEx removed — not available on Paper 1.21
+    // PermissionsEx removed - not available on Paper 1.21
 
     /**
      * Constructor
@@ -117,7 +117,7 @@ public class PermissionHandler {
             case VAULT:
                 return vaultPermission.has(player, permission);
 
-            // PEX (not supported — fallthrough to SuperPerms)
+            // PEX (not supported - fallthrough to SuperPerms)
             case PEX:
                 return player.hasPermission(new org.bukkit.permissions.Permission(permission));
 
@@ -150,7 +150,7 @@ public class PermissionHandler {
             case VAULT:
                 return vaultPermission.playerHas(worldName, plugin.getServer().getPlayer(playerName), permission);
 
-            // PEX (not supported — fallthrough to SuperPerms)
+            // PEX (not supported - fallthrough to SuperPerms)
             case PEX: {
                 Player player = plugin.getServer().getPlayer(playerName);
                 if (player == null) return false;

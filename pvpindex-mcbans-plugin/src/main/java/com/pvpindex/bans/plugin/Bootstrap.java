@@ -29,6 +29,8 @@ import com.pvpindex.bans.plugin.commands.CommandUnban;
 import com.pvpindex.bans.plugin.commands.MCBansCommandHandler;
 import com.pvpindex.bans.plugin.permission.Perms;
 import com.pvpindex.bans.plugin.placeholder.McBansPlaceholderExpansion;
+import com.pvpindex.bans.plugin.vpn.VpnConfiguration;
+import com.pvpindex.bans.plugin.vpn.VpnManager;
 import com.pvpindex.bans.storage.StorageBackend;
 import com.pvpindex.bans.storage.StorageManager;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -55,7 +57,7 @@ public final class Bootstrap {
     // -------------------------------------------------------------------------
 
     public static void onEnable(MCBans plugin) {
-        // Register plugin instance early — MCBans.getInstance() is used during init
+        // Register plugin instance early - MCBans.getInstance() is used during init
         Registry.setPlugin(plugin);
 
         ActionLog log = new ActionLog(plugin);
@@ -114,14 +116,23 @@ public final class Bootstrap {
         BanSync bansync = new BanSync(plugin);
         bansync.start();
 
-        // Store all components before registering PAPI (which may call getStorage())
-        Registry.init(plugin, config, log, debugLogger, storageManager, storage, apiClient, commandHandler, bansync);
+        // VPN detection (optional - only active when antivpn.yml is configured)
+        VpnConfiguration vpnConfig = new VpnConfiguration(plugin.getDataFolder(), plugin.getLogger());
+        vpnConfig.load();
+        VpnManager vpnManager = new VpnManager(vpnConfig, storage, plugin.getLogger());
+        vpnManager.start();
 
-        // Perform an initial sync on startup — must come after Registry.init() so
+        // Store all components before registering PAPI (which may call getStorage())
+        Registry.init(
+                plugin, config, log, debugLogger,
+                storageManager, storage, apiClient,
+                commandHandler, bansync, vpnManager);
+
+        // Perform an initial sync on startup - must come after Registry.init() so
         // plugin.getBanDao() / plugin.getApiClient() resolve correctly.
         new Thread(() -> bansync.performSync(), "MCBans-InitialSync").start();
 
-        // PlaceholderAPI integration (soft-depend — only register if PAPI is present)
+        // PlaceholderAPI integration (soft-depend - only register if PAPI is present)
         if (pm.isPluginEnabled("PlaceholderAPI")) {
             new McBansPlaceholderExpansion(storage).register();
             log.info("PlaceholderAPI expansion registered.");
@@ -136,6 +147,11 @@ public final class Bootstrap {
     // -------------------------------------------------------------------------
 
     public static void onDisable() {
+        VpnManager vpnManager = Registry.getVpnManager();
+        if (vpnManager != null) {
+            vpnManager.shutdown();
+        }
+
         BanSync bansync = Registry.getBanSync();
         if (bansync != null) {
             bansync.stopSync();

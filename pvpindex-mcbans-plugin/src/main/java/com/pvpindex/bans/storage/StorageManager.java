@@ -25,10 +25,10 @@ import java.util.logging.Logger;
  *
  * <p>Supported values (case-insensitive):
  * <ul>
- *   <li>{@code sqlite} (default) — embedded SQLite database</li>
- *   <li>{@code yaml}             — flat YAML file</li>
- *   <li>{@code mysql}            — MySQL / MariaDB via HikariCP</li>
- *   <li>{@code postgresql} / {@code postgres} — PostgreSQL via HikariCP</li>
+ *   <li>{@code sqlite} (default) - embedded SQLite database</li>
+ *   <li>{@code yaml}             - flat YAML file</li>
+ *   <li>{@code mysql}            - MySQL / MariaDB via HikariCP</li>
+ *   <li>{@code postgresql} / {@code postgres} - PostgreSQL via HikariCP</li>
  * </ul>
  * </p>
  */
@@ -46,7 +46,7 @@ public class StorageManager {
     }
 
     /**
-     * Constructor used at runtime — takes the already-loaded ConfigurationManager
+     * Constructor used at runtime - takes the already-loaded ConfigurationManager
      * so the factory can read storage settings.
      */
     public StorageManager(File dataFolder, Logger logger, ConfigurationManager config) {

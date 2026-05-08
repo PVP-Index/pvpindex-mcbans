@@ -112,14 +112,14 @@ public class MCBansAPI {
     }
     
     /**
-     * IP Ban — not supported in this version.
+     * IP Ban - not supported in this version.
      */
     public void ipBan(String ip, String senderName, String senderUUID, String reason){
         plugin.getLog().info("ipBan is not supported in this version.");
     }
 
     /**
-     * IP Ban — not supported in this version.
+     * IP Ban - not supported in this version.
      */
     public void ipBan(String ip, String senderName, String reason){
         this.ipBan(ip, senderName, "", reason);
@@ -141,21 +141,21 @@ public class MCBansAPI {
     }
 
     /**
-     * Lookup Player — not supported in this version.
+     * Lookup Player - not supported in this version.
      */
     public void lookupPlayer(String targetName, String targetUUID, String senderName, String senderUUID){
         plugin.getLog().info("lookupPlayer is not supported in this version.");
     }
 
     /**
-     * Lookup Ban — not supported in this version.
+     * Lookup Ban - not supported in this version.
      */
     public void lookupBan(int banID){
         plugin.getLog().info("lookupBan is not supported in this version.");
     }
     
     /**
-     * Lookup Alt Accounts — not supported in this version.
+     * Lookup Alt Accounts - not supported in this version.
      */
     public void lookupAlt(String playerName){
         plugin.getLog().info("lookupAlt is not supported in this version.");

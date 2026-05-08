@@ -56,6 +56,21 @@ public interface StorageBackend {
                           Long expiresAt);
 
     /**
+     * Insert a ban record imported from a legacy external source (e.g. mcbans.com).
+     * The record is stored with {@code is_legacy = true} and {@code is_synced = true}.
+     * Implementations that do not override this default fall back to
+     * {@link #insertOfflineBan}, which stores the ban without the legacy flag.
+     *
+     * @param uuid       player UUID without dashes, lowercase
+     * @param playerName last known username
+     * @param reason     ban reason from the external source
+     * @param adminName  name of the issuing admin on the external system
+     */
+    default void insertLegacyBan(String uuid, String playerName, String reason, String adminName) {
+        insertOfflineBan(uuid, playerName, "local", reason, null, adminName, null);
+    }
+
+    /**
      * Mark the ban record for {@code uuid} as synced to the API.
      *
      * @param uuid player UUID without dashes, lowercase

@@ -32,7 +32,7 @@ import java.util.logging.Logger;
  *   <li>All methods return {@code Optional.empty()} when the API is unreachable or returns a
  *       non-2xx status code, so callers can fall back to the local SQLite cache without crashing.</li>
  *   <li>Connect timeout: 3 s. Request timeout: 5 s.</li>
- *   <li>Thread-safe — the underlying {@link HttpClient} is shared.</li>
+ *   <li>Thread-safe - the underlying {@link HttpClient} is shared.</li>
  * </ul>
  */
 public class PvPIndexApiClient {
@@ -83,7 +83,7 @@ public class PvPIndexApiClient {
         try {
             HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
             if (resp.statusCode() == 404) {
-                // Player does not exist in PvPIndex yet — not banned
+                // Player does not exist in PvPIndex yet - not banned
                 return Optional.of(new BanStatusResponse(false, null));
             }
             if (!is2xx(resp)) {
@@ -186,6 +186,34 @@ public class PvPIndexApiClient {
     }
 
     // -------------------------------------------------------------------------
+    // Kick (public kick reporting)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Submit a public kick to PvPIndex.
+     * Only called when {@code kicks.public: true} is configured.
+     *
+     * @return the newly created {@link KickRecord}, or empty if the API is down
+     */
+    public Optional<KickRecord> kick(KickRequest kickRequest) {
+        String uuid = stripDashes(kickRequest.playerUuid());
+        String body = gson.toJson(kickRequest);
+        HttpRequest req = buildPost("/plugin/players/" + uuid + "/kick", body);
+        try {
+            HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
+            if (!is2xx(resp)) {
+                logger.warning("[PvPIndex] kick returned " + resp.statusCode() + ": " + resp.body());
+                return Optional.empty();
+            }
+            JsonObject json = JsonParser.parseString(resp.body()).getAsJsonObject();
+            return Optional.of(parseKickRecord(json.getAsJsonObject("kick")));
+        } catch (IOException | InterruptedException e) {
+            logger.warning("[PvPIndex] kick request failed: " + e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
 
@@ -248,5 +276,17 @@ public class PvPIndexApiClient {
             return null;
         }
         return obj.get(key).getAsString();
+    }
+
+    private KickRecord parseKickRecord(JsonObject obj) {
+        return new KickRecord(
+                getStringOrNull(obj, "id"),
+                getStringOrNull(obj, "player_uuid"),
+                getStringOrNull(obj, "player_username"),
+                getStringOrNull(obj, "reason"),
+                getStringOrNull(obj, "admin_uuid"),
+                getStringOrNull(obj, "admin_name"),
+                getStringOrNull(obj, "server_id"),
+                getStringOrNull(obj, "created_at"));
     }
 }

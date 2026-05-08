@@ -32,7 +32,7 @@ class MCBansPluginTest {
     @BeforeEach
     void setUp() {
         server = MockBukkit.mock();
-        // Load plugin — uses default config (empty API key, SQLite in temp dir)
+        // Load plugin - uses default config (empty API key, SQLite in temp dir)
         plugin = MockBukkit.load(MCBans.class);
     }
 
@@ -64,7 +64,7 @@ class MCBansPluginTest {
     @Test
     void playerJoin_withNoBan_isAllowed() {
         PlayerMock player = server.addPlayer("TestPlayer");
-        // Player added successfully — no ban exists, login should be permitted
+        // Player added successfully - no ban exists, login should be permitted
         assertNotNull(player.getUniqueId());
     }
 }

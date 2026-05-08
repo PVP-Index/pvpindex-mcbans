@@ -2,7 +2,7 @@
 
 > **Fork notice:** PvPIndex MCBans is a refactored fork of the original [MCBans](https://dev.bukkit.org/projects/mcbans) plugin by the MCBans team. The core ban-sharing concept, TCP protocol, command structure, and permission layout originate from that project. We have modernised the codebase for Java 21 and Paper 1.21+, replaced the legacy MCBans API backend with the PvPIndex REST API, split the project into a multi-module Maven build, and published the API client module on JitPack. Full credit to the original MCBans authors and contributors.
 
-Ban management plugin for Paper 1.21 servers. Connects your server to the [PvPIndex](https://pvpindex.com) global ban network so that players banned on one participating server are automatically blocked everywhere else — while still giving you complete control over local bans and storage.
+Ban management plugin for Paper 1.21 servers. Connects your server to the [PvPIndex](https://pvpindex.com) global ban network so that players banned on one participating server are automatically blocked everywhere else - while still giving you complete control over local bans and storage.
 
 ## Download
 
@@ -11,7 +11,7 @@ Get the latest JAR from the [GitHub Releases](https://github.com/PVP-Index/pvpin
 ## Quick start
 
 1. Drop `pvpindex-mcbans-<version>.jar` into your server's `plugins/` folder.
-2. Restart the server — `plugins/MCBans/config.yml` is generated with defaults.
+2. Restart the server - `plugins/MCBans/config.yml` is generated with defaults.
 3. [Apply for an API key](https://pvpindex.com/apply), then set it:
    ```yaml
    pvpindex:
@@ -31,12 +31,12 @@ Optional: [Vault](https://dev.bukkit.org/projects/vault) for non-OP permission i
 
 ## Features
 
-- **Global & local bans** — synced to the PvPIndex network in real time
-- **Temp bans** — time-limited with auto-expiry
-- **Offline resilience** — bans issued during API outages are queued and pushed on recovery
-- **Delta sync** — downloads ban changes on a configurable background interval (default 60 min)
-- **Multiple storage backends** — SQLite (default), MySQL/MariaDB, PostgreSQL
-- **Developer API** — lightweight [JitPack client](https://mcbans.pvpindex.com) for other plugins to query ban status without depending on MCBans being installed
+- **Global & local bans** - synced to the PvPIndex network in real time
+- **Temp bans** - time-limited with auto-expiry
+- **Offline resilience** - bans issued during API outages are queued and pushed on recovery
+- **Delta sync** - downloads ban changes on a configurable background interval (default 60 min)
+- **Multiple storage backends** - SQLite (default), MySQL/MariaDB, PostgreSQL
+- **Developer API** - lightweight [JitPack client](https://mcbans.pvpindex.com) for other plugins to query ban status without depending on MCBans being installed
 
 ## Documentation
 
@@ -66,7 +66,7 @@ The fat JAR is output to `pvpindex-mcbans-plugin/target/pvpindex-mcbans-<version
 
 ## Developer API (JitPack)
 
-Add the lightweight API client to your own plugin — no Bukkit dependency required:
+Add the lightweight API client to your own plugin - no Bukkit dependency required:
 
 ```xml
 <!-- Maven -->
