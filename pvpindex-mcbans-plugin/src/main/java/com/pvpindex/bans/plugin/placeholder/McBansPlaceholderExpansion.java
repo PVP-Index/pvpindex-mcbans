@@ -26,13 +26,13 @@ import java.util.Optional;
  *
  * <p>Supported placeholders:</p>
  * <ul>
- *   <li>{@code %mcbans_banned%} — {@code "true"} / {@code "false"} — whether
+ *   <li>{@code %mcbans_banned%} - {@code "true"} / {@code "false"} - whether
  *       the player has an active local ban on this server.</li>
- *   <li>{@code %mcbans_ban_type%} — {@code "global"} / {@code "local"} /
+ *   <li>{@code %mcbans_ban_type%} - {@code "global"} / {@code "local"} /
  *       {@code "temp"} / {@code "none"}.</li>
- *   <li>{@code %mcbans_ban_reason%} — the ban reason, or {@code ""} when not
+ *   <li>{@code %mcbans_ban_reason%} - the ban reason, or {@code ""} when not
  *       banned.</li>
- *   <li>{@code %mcbans_ban_admin%} — the banning admin's display name, or
+ *   <li>{@code %mcbans_ban_admin%} - the banning admin's display name, or
  *       {@code ""} when not banned.</li>
  * </ul>
  */
@@ -88,7 +88,7 @@ public final class McBansPlaceholderExpansion extends PlaceholderExpansion {
                 return banOpt.map(b -> b.adminName() != null ? b.adminName() : "").orElse("");
 
             default:
-                return null; // unknown placeholder — let PAPI handle gracefully
+                return null; // unknown placeholder - let PAPI handle gracefully
         }
     }
 }

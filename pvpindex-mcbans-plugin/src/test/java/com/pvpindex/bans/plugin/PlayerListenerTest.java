@@ -36,9 +36,9 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
  *
  * <p>These tests cover the login-check flow, particularly:</p>
  * <ul>
- *   <li><b>#118</b> — {@code failsafe=true} must deny login when the API is unreachable
+ *   <li><b>#118</b> - {@code failsafe=true} must deny login when the API is unreachable
  *       and no local ban cache entry exists for the player.</li>
- *   <li><b>#120</b> — when the API returns an error / IOException, the plugin gracefully
+ *   <li><b>#120</b> - when the API returns an error / IOException, the plugin gracefully
  *       falls back to the local SQLite cache (no crash, login allowed if not cached).</li>
  *   <li>Normal ban/unban flow: API says banned → login denied with reason in message.</li>
  *   <li>SQLite fallback: API down, local ban present → login still denied.</li>
@@ -103,7 +103,7 @@ class PlayerListenerTest {
     }
 
     // =========================================================================
-    // Issue #120 — API down: graceful fallback, no crash
+    // Issue #120 - API down: graceful fallback, no crash
     // =========================================================================
 
     @Nested
@@ -139,7 +139,7 @@ class PlayerListenerTest {
     }
 
     // =========================================================================
-    // Issue #118 — failsafe config does nothing (now fixed)
+    // Issue #118 - failsafe config does nothing (now fixed)
     // =========================================================================
 
     @Nested
@@ -168,7 +168,7 @@ class PlayerListenerTest {
 
         @Test
         void failsafe_false_allows_login_when_api_down() throws Exception {
-            // Default: failsafe=false — allow players when API is unreachable
+            // Default: failsafe=false - allow players when API is unreachable
             plugin.getConfig().set("failsafe", false);
             plugin.setApiClientForTesting(new StubApiClient(Optional.empty()));
 

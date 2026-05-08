@@ -117,6 +117,7 @@ public class YamlBackend implements StorageBackend {
                 expiresAt,
                 config.getBoolean(key + ".is_active", true),
                 config.getBoolean(key + ".is_synced", false),
+                config.getBoolean(key + ".is_legacy", false),
                 config.getLong(key + ".created_at", 0L),
                 config.getLong(key + ".updated_at", 0L)
         );
@@ -132,6 +133,7 @@ public class YamlBackend implements StorageBackend {
         config.set(key + ".expires_at",  ban.expiresAt() != null ? ban.expiresAt() : 0L);
         config.set(key + ".is_active",   ban.isActive());
         config.set(key + ".is_synced",   ban.isSynced());
+        config.set(key + ".is_legacy",   ban.isLegacy());
         config.set(key + ".created_at",  ban.createdAt());
         config.set(key + ".updated_at",  ban.updatedAt());
     }
@@ -175,7 +177,7 @@ public class YamlBackend implements StorageBackend {
         String normUuid = normalise(ban.uuid());
         LocalBan existing = fromSection(normUuid);
         if (existing != null && existing.updatedAt() >= ban.updatedAt()) {
-            return; // existing record is newer — skip
+            return; // existing record is newer - skip
         }
         writeBan(new LocalBan(
                 normUuid,
@@ -187,6 +189,7 @@ public class YamlBackend implements StorageBackend {
                 ban.expiresAt(),
                 ban.isActive(),
                 ban.isSynced(),
+                ban.isLegacy(),
                 ban.createdAt() > 0 ? ban.createdAt() : Instant.now().getEpochSecond(),
                 ban.updatedAt() > 0 ? ban.updatedAt() : Instant.now().getEpochSecond()
         ));
@@ -198,7 +201,7 @@ public class YamlBackend implements StorageBackend {
                                  String adminUuid, String adminName, Long expiresAt) {
         long now = Instant.now().getEpochSecond();
         upsertBan(new LocalBan(normalise(uuid), playerName, type, reason,
-                adminUuid, adminName, expiresAt, true, false, now, now));
+                adminUuid, adminName, expiresAt, true, false, false, now, now));
     }
 
     @Override

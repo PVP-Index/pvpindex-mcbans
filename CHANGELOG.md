@@ -13,6 +13,17 @@ Release tags use the `v` prefix (e.g. `v1.0.0`).
 
 ---
 
+## [1.2.0] - 2026-05-08
+
+### Added
+- **VPN detection** - AntVPN WebSocket integration (`wss://api.antivpn.io/connect`). Configured via `antivpn.yml` (disabled by default). Supports `WARN`, `KICK`, and `BAN` actions on detection. `BAN` action stores a local ban record. Exponential backoff reconnect (1 s to 30 s cap). `mcbans.vpn.bypass` permission (default: op) lets trusted players skip the check.
+- **Legacy ban import** - On player join the plugin queries `mcbans.com/api/v2/player/{uuid}` and caches any found ban as an `is_legacy` local record. Subsequent joins skip the network call. Controlled by the new `pvpindex.legacy` config section (`enabled`, `check-on-join`, `include-in-bans` - all default `true`).
+- **Public kicks** - New `pvpindex.kicks.public` config flag (default `false`). When enabled, every `/kick` is posted to the PvPIndex API and shown on bans.pvpindex.com.
+- **`KickRecord` and `KickRequest` DTOs** in `pvpindex-mcbans-api` - other plugins using the JitPack client can now retrieve and submit kicks.
+- Config bumped to `ConfigVersion: 4`; upgrading servers get their old config backed up automatically.
+
+---
+
 ## [1.1.0] - 2026-05-07
 
 ### Added
@@ -48,5 +59,7 @@ Release tags use the `v` prefix (e.g. `v1.0.0`).
 
 ---
 
-[Unreleased]: https://github.com/PVP-Index/pvpindex-mcbans/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/PVP-Index/pvpindex-mcbans/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/PVP-Index/pvpindex-mcbans/compare/v1.1.0...v1.2.0
+[1.1.0]: https://github.com/PVP-Index/pvpindex-mcbans/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/PVP-Index/pvpindex-mcbans/releases/tag/v1.0.0

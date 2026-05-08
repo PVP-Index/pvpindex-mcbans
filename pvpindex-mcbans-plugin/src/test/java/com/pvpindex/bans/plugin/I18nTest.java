@@ -83,7 +83,7 @@ class I18nTest {
             for (String key : keys) {
                 String result = I18n.localize(key);
                 assertFalse(result.startsWith("!") && result.endsWith("!"),
-                        "Key '" + key + "' resolved to '!key!' — missing from default.yml");
+                        "Key '" + key + "' resolved to '!key!' - missing from default.yml");
                 assertFalse(result.isBlank(), "Key '" + key + "' resolved to blank string");
             }
         }
@@ -152,7 +152,7 @@ class I18nTest {
         @Test
         void localize_replaces_ip_token_in_ipBanSuccess() {
             String result = I18n.localize("ipBanSuccess");
-            // IP is %IP% which won't be replaced without args — just ensure key resolves
+            // IP is %IP% which won't be replaced without args - just ensure key resolves
             assertFalse(result.startsWith("!"),
                     "Expected ipBanSuccess to resolve, got: " + result);
         }
@@ -191,7 +191,7 @@ class I18nTest {
             // After that, localize() should degrade gracefully to !key! since
             // messages is null (no fallback available either because it is reset).
             I18n.setCurrentLanguage("xyzzy_nonexistent_99");
-            // messages is now null — localize must return the !key! sentinel
+            // messages is now null - localize must return the !key! sentinel
             String result = I18n.localize("formatError");
             // Either !key! sentinel (messages=null path) or English fallback is acceptable
             assertNotNull(result, "localize must not return null even when messages is null");
@@ -205,7 +205,7 @@ class I18nTest {
             try {
                 I18n.setCurrentLanguage("xyzzy_nonexistent_99");
             } catch (Exception ignored) {
-                // expected — messages is now null
+                // expected - messages is now null
             }
             I18n.init("default");
 

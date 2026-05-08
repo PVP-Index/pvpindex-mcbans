@@ -1,4 +1,4 @@
-# PvPIndex MCBans — Agent Guide
+# PvPIndex MCBans - Agent Guide
 
 ## Overview
 
@@ -165,8 +165,8 @@ Coverage report: `target/site/jacoco/index.html`
 
 Two jobs on every push/PR to `main`, `feature/**`, `fix/**`:
 
-1. **checkstyle** — `mvn checkstyle:check` (fails fast)
-2. **test** — `mvn verify -Dcheckstyle.skip=true` → uploads `jacoco.xml` to Codecov
+1. **checkstyle** - `mvn checkstyle:check` (fails fast)
+2. **test** - `mvn verify -Dcheckstyle.skip=true` → uploads `jacoco.xml` to Codecov
 
 Set the `CODECOV_TOKEN` repository secret to enable Codecov reporting.
 
@@ -177,7 +177,7 @@ Set the `CODECOV_TOKEN` repository secret to enable Codecov reporting.
 - Package root: `com.pvpindex.bans`
 - 4-space indentation, 120-char line limit, no wildcard imports
 - DTOs are Java `record`s where immutable (all API response types, `LocalBan`)
-- All API calls return `Optional<T>` — never throw on network errors
+- All API calls return `Optional<T>` - never throw on network errors
 - SQLite writes are synchronous; API calls run on separate threads
-- `StorageManager` owns the `Connection`; pass it to `BanDao` — no connection pool needed for single-threaded SQLite writes
+- `StorageManager` owns the `Connection`; pass it to `BanDao` - no connection pool needed for single-threaded SQLite writes
 - Thread safety: `BanSync.syncRunning` flag prevents concurrent sync cycles; all SQLite ops are on the BanSync thread or the Paper async login thread

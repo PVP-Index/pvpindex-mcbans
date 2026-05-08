@@ -14,8 +14,10 @@ import static com.pvpindex.bans.plugin.I18n.localize;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
+import com.pvpindex.bans.api.KickRequest;
 import com.pvpindex.bans.plugin.I18n;
 import com.pvpindex.bans.plugin.MCBans;
+import com.pvpindex.bans.plugin.Registry;
 import com.pvpindex.bans.plugin.events.PlayerKickEvent;
 import com.pvpindex.bans.plugin.permission.Perms;
 import com.pvpindex.bans.plugin.util.Util;
@@ -66,16 +68,35 @@ public class Kick {
             }
             reason = kickEvent.getReason();
 
+            final String finalReason = reason;
+            final String finalPlayerUUID = playerUUID;
+            final String finalPlayerName = player.getName();
+
             // kick player
             plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
                 @Override
                 public void run() {
-                    player.kickPlayer(localize("kickPlayer", I18n.PLAYER, player.getName(), I18n.SENDER, senderName, I18n.REASON, reason));
+                    player.kickPlayer(localize("kickPlayer", I18n.PLAYER, finalPlayerName, I18n.SENDER, senderName, I18n.REASON, finalReason));
                 }
             }, 0L);
 
-            Util.broadcastMessage(ChatColor.GREEN + localize("kickSuccess", I18n.PLAYER, player.getName(), I18n.SENDER, senderName, I18n.REASON, reason));
-            plugin.getLog().info(senderName + " has kicked " + player.getName() + " [" + reason + "]");
+            Util.broadcastMessage(ChatColor.GREEN + localize("kickSuccess", I18n.PLAYER, finalPlayerName, I18n.SENDER, senderName, I18n.REASON, finalReason));
+            plugin.getLog().info(senderName + " has kicked " + finalPlayerName + " [" + finalReason + "]");
+
+            // Report kick to PvPIndex API asynchronously if kicks.public is enabled
+            if (Registry.getConfig().isKicksPublic()
+                    && Registry.getConfig().isValidApiKey()
+                    && Registry.getApiClient() != null) {
+                plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
+                    KickRequest req = new KickRequest(
+                            finalPlayerUUID,
+                            finalPlayerName,
+                            finalReason,
+                            senderUUID,
+                            senderName);
+                    Registry.getApiClient().kick(req);
+                });
+            }
         } else {
             Util.message(senderName, ChatColor.RED + localize("kickNoPlayer", I18n.PLAYER, playerName));
         }

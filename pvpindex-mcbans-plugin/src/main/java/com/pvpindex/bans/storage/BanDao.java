@@ -39,8 +39,8 @@ public class BanDao implements StorageBackend {
     /**
      * SQL dialect controlling upsert syntax.
      * <ul>
-     *   <li>{@code SQLITE}  — {@code ON CONFLICT … DO UPDATE} (also valid for PostgreSQL)</li>
-     *   <li>{@code MYSQL}   — {@code ON DUPLICATE KEY UPDATE}</li>
+     *   <li>{@code SQLITE}  - {@code ON CONFLICT … DO UPDATE} (also valid for PostgreSQL)</li>
+     *   <li>{@code MYSQL}   - {@code ON DUPLICATE KEY UPDATE}</li>
      * </ul>
      */
     public enum Dialect {
@@ -124,8 +124,8 @@ public class BanDao implements StorageBackend {
         if (dialect == Dialect.MYSQL) {
             sql = "INSERT INTO player_bans"
                 + " (uuid, player_name, type, reason, admin_uuid, admin_name,"
-                + "  expires_at, is_active, is_synced, created_at, updated_at)"
-                + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                + "  expires_at, is_active, is_synced, is_legacy, created_at, updated_at)"
+                + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
                 + " ON DUPLICATE KEY UPDATE"
                 + "  player_name = IF(VALUES(updated_at) > updated_at, VALUES(player_name), player_name),"
                 + "  type        = IF(VALUES(updated_at) > updated_at, VALUES(type),        type),"
@@ -135,13 +135,14 @@ public class BanDao implements StorageBackend {
                 + "  expires_at  = IF(VALUES(updated_at) > updated_at, VALUES(expires_at),  expires_at),"
                 + "  is_active   = IF(VALUES(updated_at) > updated_at, VALUES(is_active),   is_active),"
                 + "  is_synced   = IF(VALUES(updated_at) > updated_at, VALUES(is_synced),   is_synced),"
+                + "  is_legacy   = IF(VALUES(updated_at) > updated_at, VALUES(is_legacy),   is_legacy),"
                 + "  updated_at  = IF(VALUES(updated_at) > updated_at, VALUES(updated_at),  updated_at)";
         } else {
             sql = """
                 INSERT INTO player_bans
                   (uuid, player_name, type, reason, admin_uuid, admin_name,
-                   expires_at, is_active, is_synced, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                   expires_at, is_active, is_synced, is_legacy, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(uuid) DO UPDATE SET
                   player_name = excluded.player_name,
                   type        = excluded.type,
@@ -151,6 +152,7 @@ public class BanDao implements StorageBackend {
                   expires_at  = excluded.expires_at,
                   is_active   = excluded.is_active,
                   is_synced   = excluded.is_synced,
+                  is_legacy   = excluded.is_legacy,
                   updated_at  = excluded.updated_at
                 WHERE excluded.updated_at > player_bans.updated_at
                 """;
@@ -166,22 +168,31 @@ public class BanDao implements StorageBackend {
             ps.setObject(7, ban.expiresAt());       // Long or null
             ps.setInt(8, ban.isActive() ? 1 : 0);
             ps.setInt(9, ban.isSynced() ? 1 : 0);
-            ps.setLong(10, ban.createdAt() > 0 ? ban.createdAt() : now);
-            ps.setLong(11, ban.updatedAt() > 0 ? ban.updatedAt() : now);
+            ps.setInt(10, ban.isLegacy() ? 1 : 0);
+            ps.setLong(11, ban.createdAt() > 0 ? ban.createdAt() : now);
+            ps.setLong(12, ban.updatedAt() > 0 ? ban.updatedAt() : now);
             ps.executeUpdate();
         } catch (SQLException e) {
             logger.warning("[MCBans-SQLite] upsertBan error: " + e.getMessage());
         }
     }
 
-    /** Convenience — creates a ban marked as un-synced (offline ban). */
+    /** Convenience - creates a ban marked as un-synced (offline ban). */
     @Override
     public void insertOfflineBan(String uuid, String playerName, String type, String reason,
                                  String adminUuid, String adminName, Long expiresAt) {
         long now = Instant.now().getEpochSecond();
         upsertBan(new LocalBan(
                 normalise(uuid), playerName, type, reason, adminUuid, adminName,
-                expiresAt, true, false, now, now));
+                expiresAt, true, false, false, now, now));
+    }
+
+    /** Creates a legacy ban imported from an external source (e.g. mcbans.com). */
+    public void insertLegacyBan(String uuid, String playerName, String reason, String adminName) {
+        long now = Instant.now().getEpochSecond();
+        upsertBan(new LocalBan(
+                normalise(uuid), playerName, "local", reason, null, adminName,
+                null, true, true, true, now, now));
     }
 
     /** Mark a ban as synced to the API. */
@@ -257,7 +268,7 @@ public class BanDao implements StorageBackend {
     }
 
     // -------------------------------------------------------------------------
-    // Factory — build a LocalBan from a BanRecord received from the API
+    // Factory - build a LocalBan from a BanRecord received from the API
     // -------------------------------------------------------------------------
 
     public static LocalBan fromApiRecord(BanRecord r) {
@@ -274,7 +285,8 @@ public class BanDao implements StorageBackend {
                 r.adminName(),
                 expiresAt,
                 r.isActive(),
-                true,          // downloaded from API → already synced
+                true,          // downloaded from API - already synced
+                false,         // not a legacy import
                 updatedAt,
                 updatedAt
         );
@@ -296,6 +308,7 @@ public class BanDao implements StorageBackend {
                 expiresAt,
                 rs.getInt("is_active") == 1,
                 rs.getInt("is_synced") == 1,
+                rs.getInt("is_legacy") == 1,
                 rs.getLong("created_at"),
                 rs.getLong("updated_at")
         );

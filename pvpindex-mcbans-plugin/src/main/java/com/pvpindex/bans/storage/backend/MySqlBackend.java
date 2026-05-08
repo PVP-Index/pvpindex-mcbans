@@ -99,11 +99,18 @@ public class MySqlBackend implements StorageBackend {
                   expires_at  BIGINT,
                   is_active   TINYINT(1)   NOT NULL DEFAULT 1,
                   is_synced   TINYINT(1)   NOT NULL DEFAULT 0,
+                  is_legacy   TINYINT(1)   NOT NULL DEFAULT 0,
                   created_at  BIGINT       NOT NULL,
                   updated_at  BIGINT       NOT NULL,
                   PRIMARY KEY (uuid)
                 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
                 """);
+            // Migration: add is_legacy column if upgrading from older schema
+            try {
+                st.execute("ALTER TABLE player_bans ADD COLUMN is_legacy TINYINT(1) NOT NULL DEFAULT 0");
+            } catch (java.sql.SQLException ignored) {
+                // Column already exists - expected for fresh installs
+            }
             st.execute("""
                 CREATE INDEX IF NOT EXISTS idx_bans_active ON player_bans (uuid, is_active)
                 """);
@@ -140,6 +147,11 @@ public class MySqlBackend implements StorageBackend {
     public void insertOfflineBan(String uuid, String playerName, String type, String reason,
                                  String adminUuid, String adminName, Long expiresAt) {
         dao.insertOfflineBan(uuid, playerName, type, reason, adminUuid, adminName, expiresAt);
+    }
+
+    @Override
+    public void insertLegacyBan(String uuid, String playerName, String reason, String adminName) {
+        dao.insertLegacyBan(uuid, playerName, reason, adminName);
     }
 
     @Override

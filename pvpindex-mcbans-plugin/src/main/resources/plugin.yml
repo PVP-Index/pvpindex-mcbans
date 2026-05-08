@@ -1,12 +1,12 @@
 name: PvPIndexMCBans
 main: com.pvpindex.bans.plugin.MCBans
-version: 1.1.0
+version: 1.2.0
 api-version: 1.21
 description: PvPIndex global banning solution for Minecraft
 website: https://pvpindex.com
 authors: [ Firestar, Syamn, Corpdraco, PvPIndex, Shadow48402, ez-plugins ]
 
-softdepend: [ Vault, PlaceholderAPI ]
+softdepend: [ Vault, PlaceholderAPI, AntVPN ]
 
 commands:
   kick:
@@ -106,4 +106,7 @@ permissions:
     default: op
   mcbans.announce:
     description: Receive ban/kick broadcast announcements
+    default: op
+  mcbans.vpn.bypass:
+    description: Bypass the AntVPN check on join
     default: op

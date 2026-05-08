@@ -95,6 +95,7 @@ public class PostgresBackend implements StorageBackend {
                   expires_at  BIGINT,
                   is_active   SMALLINT     NOT NULL DEFAULT 1,
                   is_synced   SMALLINT     NOT NULL DEFAULT 0,
+                  is_legacy   SMALLINT     NOT NULL DEFAULT 0,
                   created_at  BIGINT       NOT NULL,
                   updated_at  BIGINT       NOT NULL
                 )
@@ -134,6 +135,11 @@ public class PostgresBackend implements StorageBackend {
     public void insertOfflineBan(String uuid, String playerName, String type, String reason,
                                  String adminUuid, String adminName, Long expiresAt) {
         dao.insertOfflineBan(uuid, playerName, type, reason, adminUuid, adminName, expiresAt);
+    }
+
+    @Override
+    public void insertLegacyBan(String uuid, String playerName, String reason, String adminName) {
+        dao.insertLegacyBan(uuid, playerName, reason, adminName);
     }
 
     @Override

@@ -76,7 +76,7 @@ class LanguageCompletenessTest {
         }
 
         assertTrue(failures.isEmpty(),
-                "Language file(s) have missing keys — add the keys or open a translation PR:\n"
+                "Language file(s) have missing keys - add the keys or open a translation PR:\n"
                         + String.join("\n", failures));
     }
 
@@ -93,7 +93,7 @@ class LanguageCompletenessTest {
      */
     @Test
     void extractLanguageFiles_list_includes_zh_TW() {
-        // zh-TW.yml exists in resources — this test documents that it must be included.
+        // zh-TW.yml exists in resources - this test documents that it must be included.
         InputStream stream = I18nTest.class.getResourceAsStream("/languages/zh-TW.yml");
         assertNotNull(stream, "zh-TW.yml must exist in JAR resources");
 

@@ -34,13 +34,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Unit tests for {@link PvPIndexApiClient}.
  *
  * <p>Uses an embedded {@link HttpServer} so the client makes real HTTP calls against
- * a local loopback server — no mocking framework, no real network traffic.</p>
+ * a local loopback server - no mocking framework, no real network traffic.</p>
  *
  * <p>Covers the following original MCBans issues:</p>
  * <ul>
- *   <li><b>#120</b> — {@code ConnectException} / connection refused must not crash the plugin;
+ *   <li><b>#120</b> - {@code ConnectException} / connection refused must not crash the plugin;
  *       the method must return {@code Optional.empty()} gracefully.</li>
- *   <li><b>#120</b> — HTTP 5xx from the API must also return {@code Optional.empty()}.</li>
+ *   <li><b>#120</b> - HTTP 5xx from the API must also return {@code Optional.empty()}.</li>
  *   <li>HTTP 404 (player unknown) must return {@code BanStatusResponse(false, null)}.</li>
  *   <li>HTTP 200 with {@code banned=false} must return a clean {@code BanStatusResponse}.</li>
  *   <li>HTTP 200 with {@code banned=true} must parse the ban record correctly.</li>
@@ -95,7 +95,7 @@ class PvPIndexApiClientTest {
     }
 
     // =========================================================================
-    // Issue #120 — graceful error handling (connection refused / network error)
+    // Issue #120 - graceful error handling (connection refused / network error)
     // =========================================================================
 
     @Nested
@@ -151,7 +151,7 @@ class PvPIndexApiClientTest {
 
             assertTrue(result.isPresent(), "HTTP 404 should return a present Optional");
             assertFalse(result.get().banned(),
-                    "HTTP 404 means player is unknown — not banned");
+                    "HTTP 404 means player is unknown - not banned");
         }
 
         @Test

@@ -29,17 +29,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Regression tests for open issues in the original MCBans repository.
  *
  * <ul>
- *   <li><b>#116 Debug-Messages</b> — the plugin must not use {@code System.out.println}
+ *   <li><b>#116 Debug-Messages</b> - the plugin must not use {@code System.out.println}
  *       or {@code System.err.print} in production code; all logging must go through
  *       the plugin's {@link java.util.logging.Logger}.</li>
- *   <li><b>#122 Missing plugin.yml</b> — {@code plugin.yml} must be present in the
+ *   <li><b>#122 Missing plugin.yml</b> - {@code plugin.yml} must be present in the
  *       compiled JAR (i.e. on the classpath) so Paper / Purpur can load the plugin.</li>
  * </ul>
  */
 class IssueRegressionTest {
 
     // =========================================================================
-    // Issue #116 — No System.out.println in production source
+    // Issue #116 - No System.out.println in production source
     // =========================================================================
 
     /**
@@ -92,7 +92,7 @@ class IssueRegressionTest {
     }
 
     // =========================================================================
-    // Issue #122 — plugin.yml must be present in the classpath
+    // Issue #122 - plugin.yml must be present in the classpath
     // =========================================================================
 
     /**

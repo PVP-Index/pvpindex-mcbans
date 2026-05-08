@@ -9,6 +9,9 @@
 - **Global & local bans** - issue a local ban (stays on your server) or a global ban synced to all connected servers in real time
 - **Temporary bans** - time-limited with auto-expiry in minutes, hours, days, or weeks
 - **IP bans** - ban by IP address to block VPN abuse and ban evasion
+- **VPN detection** - AntVPN WebSocket integration; configurable actions (`WARN`, `KICK`, `BAN`); `mcbans.vpn.bypass` permission lets trusted players skip the check; disabled by default via `antivpn.yml`
+- **Legacy ban import** - checks mcbans.com for existing bans on player join; results cached locally; controlled by the `pvpindex.legacy` config section
+- **Public kicks** - `pvpindex.kicks.public` flag reports kicks to the API and shows them on bans.pvpindex.com
 - **Reason presets** - define shorthand keys in config (`#hacks`, `#toxicity`) that expand to full reason strings; extended form supports a `default-duration` for temp bans; case-insensitive with tab-completion
 - **Customizable kick messages** - per-type templates (`global`, `local`, `temp`, `failsafe`) with `{reason}`, `{admin}`, `{expires}`, and `{appeal_url}` placeholders
 - **Offline resilience** - bans issued during API outages are queued and pushed on recovery; `failsafe` mode can block all logins when the API is unreachable
@@ -116,6 +119,15 @@ reason-presets:
     default-duration: "7d"
 ```
 
+VPN detection is configured separately in `plugins/MCBans/antivpn.yml`:
+
+```yaml
+antivpn:
+  enabled: false          # set to true to enable VPN detection
+  action: KICK            # WARN | KICK | BAN
+  token: ""               # your AntVPN API token
+```
+
 → Full reference: [docs.pvpindex.com/mcbans/configuration](https://docs.pvpindex.com/mcbans/configuration)
 
 ---
@@ -134,7 +146,7 @@ Add the lightweight API client to your own plugin - no Bukkit dependency require
 <dependency>
     <groupId>com.github.PVP-Index.pvpindex-mcbans</groupId>
     <artifactId>pvpindex-mcbans-api</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
 </dependency>
 ```
 

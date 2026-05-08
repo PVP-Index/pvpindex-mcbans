@@ -25,7 +25,7 @@ import com.pvpindex.bans.plugin.util.Util;
 
 public class ConfigurationManager {
     /* Current config.yml File Version! */
-    private final int latestVersion = 3;
+    private final int latestVersion = 4;
 
     private final MCBans plugin;
     private final ActionLog log;
@@ -209,6 +209,32 @@ public class ConfigurationManager {
             return conf.getBoolean("storage.sync.enabled", true);
         }
         return isEnableAutoSync();
+    }
+
+    /**
+     * Whether kicks should be reported to the PvPIndex API and shown publicly
+     * on bans.pvpindex.com. Controlled by {@code pvpindex.kicks.public} in config.yml.
+     * Defaults to {@code false} to preserve privacy by default.
+     */
+    public boolean isKicksPublic() {
+        return conf.getBoolean("pvpindex.kicks.public", false);
+    }
+
+    // ─── Legacy ban settings ─────────────────────────────────────────────────
+
+    /** Whether importing bans from mcbans.com is enabled. */
+    public boolean isLegacyEnabled() {
+        return conf.getBoolean("pvpindex.legacy.enabled", true);
+    }
+
+    /** Whether to query mcbans.com on every player join. */
+    public boolean isLegacyCheckOnJoin() {
+        return conf.getBoolean("pvpindex.legacy.check-on-join", true);
+    }
+
+    /** Whether a mcbans.com ban should prevent the player from joining this server. */
+    public boolean isLegacyIncludeInBans() {
+        return conf.getBoolean("pvpindex.legacy.include-in-bans", true);
     }
 
     public String getDbHost() {
